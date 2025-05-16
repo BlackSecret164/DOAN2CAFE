@@ -13,6 +13,7 @@ async function bootstrap() {
       'http://localhost:3001',
       'http://localhost:3002',
       'https://cafe-k5p5.onrender.com',
+      'https://doan2cafe.onrender.com',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
