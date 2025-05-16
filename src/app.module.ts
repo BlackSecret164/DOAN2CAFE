@@ -1,0 +1,43 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FileModule } from './modules/upload.module';
+import { AuthModule } from './modules/auth.module';
+import { StaffModule } from './modules/staff.module';
+import { TableModule } from './modules/table.module';
+import { RawMaterialModule } from './modules/material.module';
+import { CustomerModule } from './modules/customer.module';
+import { ProductModule } from './modules/product.module';
+import { OrderModule } from './modules/order.module';
+import { PromoteModule } from './modules/promote.module';
+import { MembershipModule } from './modules/membership.module';
+import { ReportModule } from './modules/report.module';
+import typeorm from './commons/TypeORMConfig';
+import { envFiles } from './commons/Constant';
+// import thêm các entity khác ở đây
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: envFiles,
+      isGlobal: true,
+      load: [typeorm],
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => (configService.get('typeorm'))
+    }),
+    FileModule,
+    AuthModule,
+    StaffModule,
+    TableModule,
+    RawMaterialModule,
+    CustomerModule,
+    ProductModule,
+    OrderModule,
+    PromoteModule,
+    MembershipModule,
+    ReportModule,
+  ],
+})
+export class AppModule {}
