@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, IsNumber, IsDate, IsBoolean, MaxLength, IsDateString, IsInt } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDate, IsBoolean, IsDateString, IsInt, IsIn, MaxLength } from 'class-validator';
 
 export class StaffDto {
   @ApiProperty()
@@ -35,11 +35,6 @@ export class StaffDto {
 
   @ApiProperty()
   @IsOptional()
-  @IsString()
-  typeStaff: string;
-
-  @ApiProperty()
-  @IsOptional()
   @IsDate()
   startDate: string;
 
@@ -55,9 +50,13 @@ export class StaffDto {
   @IsNumber()
   minsalary: number;
 
-  @ApiProperty()
-  @IsString()
+  @ApiProperty({ enum: ['ADMIN_SYSTEM', 'ADMIN_BRAND', 'STAFF'] })
+  @IsIn(['ADMIN_SYSTEM', 'ADMIN_BRAND', 'STAFF'])
   role: string;
+
+  @ApiProperty()
+  @IsNumber()
+  branchId: number; // bắt buộc nếu không phải ADMIN_SYSTEM
 }
 
 export class UpdateStaffDto {

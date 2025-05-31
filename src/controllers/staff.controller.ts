@@ -1,9 +1,16 @@
-import { Controller, Get, Post, Param, Body, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, Put, UseGuards } from '@nestjs/common';
 import { StaffService } from '../services/staff.service';
 import { StaffDto, UpdateStaffDto } from 'src/dtos/staff.dto';
-import { ApiTags, ApiOperation, ApiResponse,ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/guards/RoleGuard';
+import { Role } from 'src/guards/RoleDecorator';
+import { EnumRoles } from 'src/enums/role.enum';
 
 @ApiTags('Staff')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RoleGuard)
+@Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}

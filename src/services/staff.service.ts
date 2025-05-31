@@ -49,4 +49,8 @@ export class StaffService {
     const staff = await this.findOne(id);
     await this.staffRepository.remove(staff);
   }
+
+  async findByBranch(branchId: number): Promise<Staff[]> {
+    return this.staffRepository.find({ where: { branchId } });
+  }
 }

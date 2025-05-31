@@ -12,6 +12,9 @@ import { OrderModule } from './modules/order.module';
 import { PromoteModule } from './modules/promote.module';
 import { MembershipModule } from './modules/membership.module';
 import { ReportModule } from './modules/report.module';
+import { BranchModule } from './modules/branch.module';
+import { BranchStaffModule } from './modules/branchstaff.module';
+import { ProductBranchModule } from './modules/product_branch.module';
 import typeorm from './commons/TypeORMConfig';
 import { envFiles } from './commons/Constant';
 // import thêm các entity khác ở đây
@@ -29,11 +32,14 @@ import { envFiles } from './commons/Constant';
     }),
     FileModule,
     AuthModule,
+    BranchModule,
     StaffModule,
+    BranchStaffModule,
     TableModule,
     RawMaterialModule,
     CustomerModule,
     ProductModule,
+    ProductBranchModule,
     OrderModule,
     PromoteModule,
     MembershipModule,

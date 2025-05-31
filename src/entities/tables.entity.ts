@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Order } from './order_tb.entity';
+import { Branch } from './branches.entity';
 
 @Entity('tables')
 export class Table {
@@ -21,10 +22,13 @@ export class Table {
   @Column({ type: 'int' })
   seat: number;
 
-  @Column({ length: 50 })
+  @Column({ length: 50, nullable: true })
   name: string;
+
+  @ManyToOne(() => Branch, (branch) => branch.tables, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'branchid' })
+  branch: Branch;
 
   @OneToMany(() => Order, (order) => order.table)
   orders: Order[];
 }
-

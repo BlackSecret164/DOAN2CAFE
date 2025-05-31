@@ -3,58 +3,72 @@ import { WorkShift } from './workshift.entity';
 import { Role } from './role.entity';
 import { Order } from './order_tb.entity';
 import { ActivityLog } from './activity_log.entity';
+import { Branch } from './branches.entity';
 
 @Entity('staff')
 export class Staff {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  @Column({ length: 10, nullable: true })
+  @Column({ type: 'varchar', length: 10, nullable: true })
   gender: string;
 
-  @Column('date', { nullable: true })
-  birth: string;
+  @Column({ type: 'date', nullable: true })
+  birth: Date;
 
-  @Column({ length: 40, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   address: string;
 
-  @Column({ length: 15 })
+  @Column({ type: 'varchar', length: 15 })
   phone: string;
+
+  @Column({ type: 'int', name: 'workshiftid', nullable: true })
+  workshifId: number;
 
   @ManyToOne(() => WorkShift, (workShift) => workShift.staff)
   @JoinColumn({ name: 'workshiftid' })
   workShift: WorkShift;
 
-  @Column('integer', { name: 'workhours', default: 0 })
+  @Column({ type: 'int', name: 'workhours', default: 0 })
   workHours: number;
 
-  @Column('integer', { default: 3000000 })
+  @Column({ type: 'int', default: 3000000 })
   salary: number;
 
-  @Column({ name: 'typestaff', length: 50, nullable: true })
-  typeStaff: string;
+  @Column({ type: 'int', name: 'minsalary', default: 30000 })
+  minsalary: number;
 
-  @Column('date', { name: 'startdate', nullable: true })
-  startDate: string;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  typestaff: string;
 
-  @Column('boolean', { name: 'activestatus', default: true })
+  @Column({ type: 'date', name: 'startdate', nullable: true })
+  startDate: Date;
+
+  @Column({ type: 'boolean', name: 'activestatus', default: true })
   activeStatus: boolean;
+
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
+
+  @Column({ type: 'int', name: 'roleid', nullable: true })
+  roleId: number;
 
   @ManyToOne(() => Role, (role) => role.staff)
   @JoinColumn({ name: 'roleid' })
-  roles: Role;
+  roleEntity: Role;
 
-  @Column({ length: 20 })
-  password: string;
+  @Column({ type: 'varchar', length: 15 })
+  role: string; // ADMIN_SYSTEM | ADMIN_BRAND | STAFF
 
-  @Column('integer', { name: 'minsalary', default: 30000 })
-  minsalary: number;
+  @Column({ type: 'int', name: 'branchid', nullable: true })
+  branchId: number;
 
-  @Column({ name: 'role', length: 15 })
-  role: string;
+  @ManyToOne(() => Branch, (branch) => branch.staff, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'branchid' })
+  branch: Branch;
 
   @OneToMany(() => Order, (order) => order.staff)
   orders: Order[];

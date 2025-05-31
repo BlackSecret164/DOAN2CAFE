@@ -1,0 +1,71 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ProductBranch } from '../entities/product_branch.entity';
+import {
+  CreateProductBranchDto,
+  UpdateProductBranchStatusDto,
+} from '../dtos/product_branch.dto';
+import { Product } from '../entities/product.entity';
+import { Branch } from '../entities/branches.entity';
+
+@Injectable()
+export class ProductBranchService {
+  constructor(
+    @InjectRepository(ProductBranch)
+    private readonly productBranchRepo: Repository<ProductBranch>,
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    @InjectRepository(Branch)
+    private readonly branchRepo: Repository<Branch>,
+  ) {}
+
+  findAll(branchId: number) {
+    return this.productBranchRepo.find({
+      where: { branch: { id: branchId } },
+      relations: ['product', 'branch'],
+    });
+  }
+
+  async create(dto: CreateProductBranchDto, branchId: number) {
+    const product = await this.productRepo.findOne({ where: { id: dto.productId } });
+    const branch = await this.branchRepo.findOne({ where: { id: branchId } });
+
+    if (!product || !branch) throw new NotFoundException('Product or Branch not found');
+
+    const newRecord = this.productBranchRepo.create({
+      product,
+      branch,
+      available: dto.available,
+    });
+
+    return this.productBranchRepo.save(newRecord);
+  }
+
+  async findOne(id: number, branchId: number) {
+    const record = await this.productBranchRepo.findOne({
+      where: { id, branch: { id: branchId } },
+      relations: ['product', 'branch'],
+    });
+    if (!record) {
+      throw new NotFoundException(`ProductBranch with ID ${id} not found in your branch`);
+    }
+    return record;
+  }
+
+  async updateAvailability(id: number, dto: UpdateProductBranchStatusDto, branchId: number) {
+    const record = await this.productBranchRepo.findOne({
+      where: { id, branch: { id: branchId } },
+    });
+    if (!record) throw new NotFoundException('ProductBranch not found in your branch');
+    record.available = dto.available;
+    return this.productBranchRepo.save(record);
+  }
+
+  async remove(id: number, branchId: number) {
+    const result = await this.productBranchRepo.delete({ id, branch: { id: branchId } });
+    if (result.affected === 0) {
+      throw new NotFoundException(`ProductBranch with ID ${id} not found in your branch`);
+    }
+  }
+}

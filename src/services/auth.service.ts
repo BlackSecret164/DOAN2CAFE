@@ -34,6 +34,7 @@ export class AuthService {
       id: user.id,
       phone: user.phone,
       role: user.role,
+      branchId: user.branchid,
     });
 
     return {
@@ -44,6 +45,7 @@ export class AuthService {
         name: user.name,
         phone: user.phone,
         role: user.role,
+        branchId: user.branchid,
       },
     };
   }

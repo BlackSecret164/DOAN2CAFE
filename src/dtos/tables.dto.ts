@@ -28,4 +28,8 @@ export class TableDto {
   @ApiProperty()
   @IsString()
   name: string;
+
+  @ApiProperty()
+  @IsNumber()
+  branchId: number;
 }

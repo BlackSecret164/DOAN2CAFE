@@ -4,6 +4,7 @@ import { Table } from './tables.entity';
 import { OrderDetails } from './order-details.entity';
 import { Customer } from './customer.entity';
 import { Invoice } from './invoice.entity';
+import { Branch } from './branches.entity';
 
 @Entity({ name: 'order_tb' })
 export class Order {
@@ -48,4 +49,11 @@ export class Order {
 
   @OneToMany(() => Invoice, (invoice) => invoice.order)
   invoices: Invoice[];
+
+  @ManyToOne(() => Branch, (branch) => branch.orders, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'branchid' })
+  branch: Branch;
+
+  @Column({ name: 'branchid', type: 'int' })
+  branchId: number;
 }

@@ -35,6 +35,10 @@ export class CreateOrderDto {
   @ApiProperty({ type: [Number] })
   @IsArray()
   productIDs: number[];
+
+  @ApiProperty()
+  @IsInt()
+  branchId: number;
 }
 
 export class UpdateOrderDto {
