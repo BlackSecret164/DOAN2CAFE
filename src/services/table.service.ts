@@ -1,4 +1,3 @@
-// src/services/table.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,25 +11,33 @@ export class TableService {
     private readonly tableRepository: Repository<Table>,
   ) {}
 
-  async findAll(): Promise<Table[]> {
-    return this.tableRepository.find({ order: { id: 'ASC' } });
+  async findAll(branchId: number): Promise<Table[]> {
+    return this.tableRepository.find({
+      where: { branchId: branchId },
+      order: { id: 'ASC' },
+    });
   }
 
-  async findOne(id: number): Promise<Table> {
-    const table = await this.tableRepository.findOne({ where: { id } });
+  async findOne(id: number, branchId: number): Promise<Table> {
+    const table = await this.tableRepository.findOne({
+      where: { id, branchId: branchId },
+    });
     if (!table) {
-      throw new NotFoundException(`Table with ID ${id} not found`);
+      throw new NotFoundException(`Table with ID ${id} not found in your branch`);
     }
     return table;
   }
 
-  async create(tableDto: TableDto): Promise<Table> {
-    const table = this.tableRepository.create(tableDto);
+  async create(tableDto: TableDto, branchId: number): Promise<Table> {
+    const table = this.tableRepository.create({
+      ...tableDto,
+      branchId: branchId,
+    });
     return this.tableRepository.save(table);
   }
 
-  async update(id: number, tableDto: Partial<TableDto>): Promise<Table> {
-    const table = await this.findOne(id);
+  async update(id: number, tableDto: Partial<TableDto>, branchId: number): Promise<Table> {
+    const table = await this.findOne(id, branchId);
     Object.assign(table, {
       ...tableDto,
       bookingTime: tableDto.bookingTime || null,
@@ -39,8 +46,8 @@ export class TableService {
     return this.tableRepository.save(table);
   }
 
-  async completeTable(id: number): Promise<Table> {
-    const table = await this.findOne(id);
+  async completeTable(id: number, branchId: number): Promise<Table> {
+    const table = await this.findOne(id, branchId);
     table.status = 'Available';
     table.phoneOrder = null;
     table.name = null;
@@ -49,8 +56,8 @@ export class TableService {
     return this.tableRepository.save(table);
   }
 
-  async remove(id: number): Promise<void> {
-    const table = await this.findOne(id);
+  async remove(id: number, branchId: number): Promise<void> {
+    const table = await this.findOne(id, branchId);
     await this.tableRepository.remove(table);
   }
 }

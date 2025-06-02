@@ -12,10 +12,7 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ProductBranchService } from '../services/product_branch.service';
-import {
-  CreateProductBranchDto,
-  UpdateProductBranchStatusDto,
-} from '../dtos/product_branch.dto';
+import { CreateProductBranchDto, UpdateProductBranchStatusDto } from '../dtos/product_branch.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { RoleGuard } from 'src/guards/RoleGuard';

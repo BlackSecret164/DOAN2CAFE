@@ -1,20 +1,18 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Param,
-  Body,
-  Delete,
-  Put,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, Delete, Put, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { OrderService } from '../services/order.service';
 import { CreateOrderDto } from '../dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/guards/RoleGuard';
+import { Role } from 'src/guards/RoleDecorator';
+import { EnumRoles } from 'src/enums/role.enum';
 //import { CreateFullOrderDto } from 'src/dtos/create-full-order.dto';
 
 @ApiTags('Order')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RoleGuard)
+@Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
@@ -37,17 +35,11 @@ export class OrderController {
     return this.orderService.findOne(id);
   }
 
-  @Post()
+  /*@Post()
   @ApiOperation({ summary: 'Create order only (no details)' })
   create(@Body() dto: CreateOrderDto) {
     return this.orderService.create(dto);
-  }
-
-  // @Post('/full')
-  // @ApiOperation({ summary: 'Create order with details (transaction)' })
-  // createFull(@Body() dto: CreateFullOrderDto) {
-  //   return this.orderService.createFull(dto);
-  // }
+  }*/
 
   @Put(':id')
   @ApiOperation({ summary: 'Update order by ID' })
@@ -73,9 +65,9 @@ export class OrderController {
     return this.orderService.remove(id);
   }
 
-  @Post('/detail/:id')
+  /*@Post('/detail/:id')
   @ApiOperation({ summary: 'Add product to existing order' })
   addDetail(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateOrderDetailsDto) {
     return this.orderService.addDetail(id, dto);
-  }
+  }*/
 }

@@ -1,18 +1,16 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Param,
-  Body,
-  Delete,
-  ParseIntPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ProductService } from '../services/product.service';
 import { CreateProductDto, UpdateStatusDto } from '../dtos/product.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
+import { RoleGuard } from 'src/guards/RoleGuard';
+import { Role } from 'src/guards/RoleDecorator';
+import { EnumRoles } from 'src/enums/role.enum';
 
 @ApiTags('Product')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'), RoleGuard)
+@Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

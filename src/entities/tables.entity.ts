@@ -25,6 +25,9 @@ export class Table {
   @Column({ length: 50, nullable: true })
   name: string;
 
+  @Column({ type: 'int', name: 'branchid', nullable: true })
+  branchId: number;
+
   @ManyToOne(() => Branch, (branch) => branch.tables, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'branchid' })
   branch: Branch;
