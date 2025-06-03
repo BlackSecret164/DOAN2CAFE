@@ -10,9 +10,9 @@ import { EnumRoles } from 'src/enums/role.enum';
 //import { CreateFullOrderDto } from 'src/dtos/create-full-order.dto';
 
 @ApiTags('Order')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RoleGuard)
-@Role([EnumRoles.ADMIN_SYSTEM])
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard('jwt'), RoleGuard)
+// @Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}

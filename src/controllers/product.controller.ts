@@ -8,9 +8,9 @@ import { Role } from 'src/guards/RoleDecorator';
 import { EnumRoles } from 'src/enums/role.enum';
 
 @ApiTags('Product')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RoleGuard)
-@Role([EnumRoles.ADMIN_SYSTEM])
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard('jwt'), RoleGuard)
+// @Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

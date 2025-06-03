@@ -8,9 +8,9 @@ import { Role } from 'src/guards/RoleDecorator';
 import { EnumRoles } from 'src/enums/role.enum';
 
 @ApiTags('Staff')
-@ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'), RoleGuard)
-@Role([EnumRoles.ADMIN_SYSTEM])
+// @ApiBearerAuth()
+// @UseGuards(AuthGuard('jwt'), RoleGuard)
+// @Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('staff')
 export class StaffController {
   constructor(private readonly staffService: StaffService) {}
