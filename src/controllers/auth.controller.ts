@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, HttpCode } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
 import { StaffSigninDto } from '../dtos/auth.dto';
@@ -9,6 +9,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signin')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Đăng nhập' })
   async signin(@Body() dto: StaffSigninDto) {
     return this.authService.signin(dto);
