@@ -19,6 +19,8 @@ async function bootstrap() {
       'http://localhost:3002',
       'https://cafe-k5p5.onrender.com',
       'https://doan2cafe.onrender.com',
+      'https://testapi-roan.vercel.app',
+      'https://doan2cafe-production.up.railway.app'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
