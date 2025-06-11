@@ -3,7 +3,9 @@ import { config as dotenvConfig } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { envFiles } from './Constant';
 
-dotenvConfig({ path: envFiles });
+if (process.env.NODE_ENV !== 'production') {
+  dotenvConfig({ path: envFiles }); // chỉ load khi dev
+}
 
 const config: DataSourceOptions = {
   type: 'postgres',
