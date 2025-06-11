@@ -1,8 +1,10 @@
+import { registerAs } from '@nestjs/config';
+import { config as dotenvConfig } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import * as dotenv from 'dotenv';
+import { envFiles } from './Constant';
 
 if (process.env.NODE_ENV !== 'production') {
-  dotenv.config({ path: '.env' }); // sử dụng .env trong dev
+  dotenvConfig({ path: envFiles }); // chỉ load khi dev
 }
 
 const config: DataSourceOptions = {
@@ -12,12 +14,14 @@ const config: DataSourceOptions = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+  entities: ['dist/**/*.entity{.ts,.js}'],
+  migrations: ['dist/migrations/*{.ts,.js}'],
   synchronize: false,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  ssl: {
+    rejectUnauthorized: false,
+  },
   logging: true,
 };
 
+export default registerAs('typeorm', () => config);
 export const connectionSource = new DataSource(config);
-export default config;
