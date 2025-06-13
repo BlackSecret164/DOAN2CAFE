@@ -3,57 +3,81 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Branch } from '../entities/branches.entity';
 import { Repository } from 'typeorm';
 import { CreateBranchDto } from '../dtos/branches.dto';
+import { ProductBranch } from '../entities/product_branch.entity';
+import { Product } from '../entities/product.entity';
 
 @Injectable()
 export class BranchService {
   constructor(
     @InjectRepository(Branch)
     private readonly branchRepo: Repository<Branch>,
-  ) {}
+    @InjectRepository(Product)
+    private readonly productRepo: Repository<Product>,
+    @InjectRepository(ProductBranch)
+    private readonly productBranchRepo: Repository<ProductBranch>,
+  ) { }
 
   async findAll(): Promise<Branch[]> {
-  return this.branchRepo.find({
-    relations: ['manager'], // Load quan hệ manager
-    select: {
-      id: true,
-      name: true,
-      address: true,
-      phone: true,
-      createdAt: true,
-      manager: {
+    return this.branchRepo.find({
+      relations: ['manager'], // Load quan hệ manager
+      select: {
         id: true,
         name: true,
+        address: true,
         phone: true,
+        createdAt: true,
+        manager: {
+          id: true,
+          name: true,
+          phone: true,
+        },
       },
-    },
-  });
-}
+    });
+  }
 
-async findOne(id: number): Promise<Branch> {
-  const branch = await this.branchRepo.findOne({
-    where: { id },
-    relations: ['manager'],
-    select: {
-      id: true,
-      name: true,
-      address: true,
-      phone: true,
-      createdAt: true,
-      manager: {
+  async findOne(id: number): Promise<Branch> {
+    const branch = await this.branchRepo.findOne({
+      where: { id },
+      relations: ['manager'],
+      select: {
         id: true,
         name: true,
+        address: true,
         phone: true,
+        createdAt: true,
+        manager: {
+          id: true,
+          name: true,
+          phone: true,
+        },
       },
-    },
-  });
-  if (!branch) throw new NotFoundException(`Branch with id ${id} not found`);
-  return branch;
-}
+    });
+    if (!branch) throw new NotFoundException(`Branch with id ${id} not found`);
+    return branch;
+  }
 
   async create(dto: CreateBranchDto): Promise<Branch> {
     const newBranch = this.branchRepo.create(dto);
-    return this.branchRepo.save(newBranch);
+    const branch = await this.branchRepo.save(newBranch);
+
+    // Lấy tất cả sản phẩm hiện có
+    const products = await this.productRepo.find();
+
+    // Tạo các bản ghi ProductBranch tương ứng
+    const productBranches = products.map((product) => {
+      const pb = new ProductBranch();
+      pb.branch = branch;
+      pb.product = product;
+      pb.available = true; // hoặc false tuỳ theo logic của bạn
+      return pb;
+    });
+
+    // Lưu các bản ghi product_branch
+    await this.productBranchRepo.save(productBranches);
+
+    return branch;
   }
+
 
   async update(id: number, dto: CreateBranchDto): Promise<Branch> {
     const branch = await this.findOne(id);
