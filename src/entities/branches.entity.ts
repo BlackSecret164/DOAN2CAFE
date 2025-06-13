@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Staff } from './staff.entity';
 import { Table } from './tables.entity';
 import { Order } from './order_tb.entity';
@@ -28,4 +28,11 @@ export class Branch {
 
   @OneToMany(() => Order, order => order.branch)
   orders: Order[];
+
+  @Column({ name: 'managerid', nullable: true })
+  managerId: number;
+
+  @ManyToOne(() => Staff, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'managerid' })
+  manager: Staff;
 }

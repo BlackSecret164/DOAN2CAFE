@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsPhoneNumber, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsString, IsPhoneNumber, IsDateString, IsOptional, IsInt } from 'class-validator';
 
 export class CreateBranchDto {
   @ApiProperty()
@@ -20,4 +20,9 @@ export class CreateBranchDto {
   @ApiProperty()
   @IsDateString()
   createdAt: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsInt()
+  managerId?: number;
 }

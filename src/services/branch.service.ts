@@ -12,14 +12,43 @@ export class BranchService {
   ) {}
 
   async findAll(): Promise<Branch[]> {
-    return this.branchRepo.find();
-  }
+  return this.branchRepo.find({
+    relations: ['manager'], // Load quan hệ manager
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      phone: true,
+      createdAt: true,
+      manager: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+    },
+  });
+}
 
-  async findOne(id: number): Promise<Branch> {
-    const branch = await this.branchRepo.findOneBy({ id });
-    if (!branch) throw new NotFoundException(`Branch with id ${id} not found`);
-    return branch;
-  }
+async findOne(id: number): Promise<Branch> {
+  const branch = await this.branchRepo.findOne({
+    where: { id },
+    relations: ['manager'],
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      phone: true,
+      createdAt: true,
+      manager: {
+        id: true,
+        name: true,
+        phone: true,
+      },
+    },
+  });
+  if (!branch) throw new NotFoundException(`Branch with id ${id} not found`);
+  return branch;
+}
 
   async create(dto: CreateBranchDto): Promise<Branch> {
     const newBranch = this.branchRepo.create(dto);
