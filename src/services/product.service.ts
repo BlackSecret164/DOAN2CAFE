@@ -7,6 +7,8 @@ import { CreateProductDto } from '../dtos/product.dto';
 import { UpdateProductDto } from '../dtos/product.dto';
 import { UpdateStatusDto } from '../dtos/product.dto';
 import { ProductMaterial } from '../entities/product-material.entity';
+import { ProductBranch } from 'src/entities/product_branch.entity';
+import { Branch } from 'src/entities/branches.entity';
 
 @Injectable()
 export class ProductService {
@@ -113,6 +115,17 @@ export class ProductService {
       }
 
       await queryRunner.commitTransaction();
+      const branches = await queryRunner.manager.find(Branch);
+
+      const productBranches = branches.map((branch) => {
+        const pb = new ProductBranch();
+        pb.product = product;
+        pb.branch = branch;
+        pb.available = true;
+        return pb;
+      });
+
+      await queryRunner.manager.save(ProductBranch, productBranches);
 
       return { message: 'Product created successfully', id: product.id };
     } catch (err) {
