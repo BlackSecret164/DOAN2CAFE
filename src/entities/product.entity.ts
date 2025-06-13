@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, OneToMany } from 'typeorm';
-import { RawMaterial } from './rawmaterial.entity';
+// Thêm thư viện này để hỗ trợ JSON column
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { OrderDetails } from './order-details.entity';
 import { ProductMaterial } from './product-material.entity';
+import { ProductSize } from './product_size.entity';
 
 @Entity({ name: 'product' })
 export class Product {
@@ -17,23 +18,11 @@ export class Product {
   @Column({ length: 255 })
   image: string;
 
+  @Column({ length: 255 })
+  description: string;
+
   @Column({ default: true })
   available: boolean;
-
-  @Column('int')
-  price: number;
-
-  @Column('int')
-  upsize: number;
-
-  @Column({ type: 'boolean', default: false })
-  sizes: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  sizem: boolean;
-
-  @Column({ type: 'boolean', default: false })
-  sizel: boolean;
 
   @Column({ type: 'boolean', default: false })
   hot: boolean;
@@ -41,11 +30,19 @@ export class Product {
   @Column({ type: 'boolean', default: false })
   cold: boolean;
 
+  @Column({ name:'ispopular', type: 'boolean', default: false })
+  isPopular: boolean;
+
+  @Column({ name: 'isnew', type: 'boolean', default: false })
+  isNew: boolean;
+
   @OneToMany(() => ProductMaterial, (pm) => pm.product)
-    productMaterials: ProductMaterial[];
+  productMaterials: ProductMaterial[];
 
-
-  @OneToMany(() => OrderDetails, orderDetails => orderDetails.product)
+  @OneToMany(() => OrderDetails, (orderDetails) => orderDetails.product)
   orderDetails: OrderDetails[];
+
+  @OneToMany(() => ProductSize, (size) => size.product, { cascade: true })
+  sizes: ProductSize[];
 
 }

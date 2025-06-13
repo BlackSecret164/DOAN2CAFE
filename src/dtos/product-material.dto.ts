@@ -14,3 +14,13 @@ export class CreateProductMaterialDto {
   @IsNumber()
   materialQuantity: number;
 }
+
+export class ProductMaterialInputDto {
+  @ApiProperty()
+  @IsNumber()
+  materialId: number;
+
+  @ApiProperty()
+  @IsNumber()
+  materialQuantity: number;
+}

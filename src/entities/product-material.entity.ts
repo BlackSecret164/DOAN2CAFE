@@ -1,24 +1,33 @@
-import { Entity, PrimaryColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  ManyToOne,
+  JoinColumn,
+  Column,
+} from 'typeorm';
 import { Product } from './product.entity';
 import { RawMaterial } from './rawmaterial.entity';
 
 @Entity({ name: 'product_material' })
 export class ProductMaterial {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'productid' })
   productId: number;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ name: 'materialid' })
   materialId: number;
 
-  @ManyToOne(() => Product, (product) => product.productMaterials)
-  @JoinColumn({ name: 'productId' })
+  @ManyToOne(() => Product, (product) => product.productMaterials, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'productid' })
   product: Product;
 
-  @ManyToOne(() => RawMaterial, (rawMaterial) => rawMaterial.productMaterials)
-  @JoinColumn({ name: 'materialId' })
+  @ManyToOne(() => RawMaterial, (rawMaterial) => rawMaterial.productMaterials, {
+    eager: true,
+  })
+  @JoinColumn({ name: 'materialid' })
   rawMaterial: RawMaterial;
 
-  @Column('numeric')
+  @Column({ name: 'materialquantity', type: 'numeric' })
   materialQuantity: number;
 }
-
