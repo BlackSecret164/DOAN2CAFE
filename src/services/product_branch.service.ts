@@ -18,13 +18,90 @@ export class ProductBranchService {
     private readonly productRepo: Repository<Product>,
     @InjectRepository(Branch)
     private readonly branchRepo: Repository<Branch>,
-  ) {}
+  ) { }
 
-  findAll(branchId: number) {
-    return this.productBranchRepo.find({
+  async findAll(branchId: number) {
+    const records = await this.productBranchRepo.find({
       where: { branch: { id: branchId } },
-      relations: ['product', 'branch'],
+      relations: [
+        'product',
+        'product.sizes',
+        'product.productMaterials',
+        'product.productMaterials.rawMaterial',
+        'branch',
+      ],
     });
+
+    return records.map((record) => ({
+      id: record.product.id.toString(),
+      name: record.product.name,
+      category: record.product.category,
+      description: record.product.description,
+      image: record.product.image,
+      available: record.available,
+      hot: record.product.hot,
+      cold: record.product.cold,
+      isPopular: record.product.isPopular,
+      isNew: record.product.isNew,
+      sizes: record.product.sizes.map((s) => ({
+        sizeName: s.sizeName,
+        price: s.price,
+      })),
+      materials: record.product.productMaterials.map((pm) => ({
+        name: pm.rawMaterial.name,
+      })),
+      branch: {
+        id: record.branch.id,
+        name: record.branch.name,
+        address: record.branch.address,
+        phone: record.branch.phone,
+        createdAt: record.branch.createdAt,
+      },
+    }));
+  }
+
+  async findOne(id: number, branchId: number) {
+    const record = await this.productBranchRepo.findOne({
+      where: { id, branch: { id: branchId } },
+      relations: [
+        'product',
+        'product.sizes',
+        'product.productMaterials',
+        'product.productMaterials.rawMaterial',
+        'branch',
+      ],
+    });
+
+    if (!record) {
+      throw new NotFoundException(`ProductBranch with ID ${id} not found in your branch`);
+    }
+
+    return {
+      id: record.product.id.toString(),
+      name: record.product.name,
+      category: record.product.category,
+      description: record.product.description,
+      image: record.product.image,
+      available: record.available,
+      hot: record.product.hot,
+      cold: record.product.cold,
+      isPopular: record.product.isPopular,
+      isNew: record.product.isNew,
+      sizes: record.product.sizes.map((s) => ({
+        sizeName: s.sizeName,
+        price: s.price,
+      })),
+      materials: record.product.productMaterials.map((pm) => ({
+        name: pm.rawMaterial.name,
+      })),
+      branch: {
+        id: record.branch.id,
+        name: record.branch.name,
+        address: record.branch.address,
+        phone: record.branch.phone,
+        createdAt: record.branch.createdAt,
+      },
+    };
   }
 
   async create(dto: CreateProductBranchDto, branchId: number) {
@@ -42,16 +119,16 @@ export class ProductBranchService {
     return this.productBranchRepo.save(newRecord);
   }
 
-  async findOne(id: number, branchId: number) {
-    const record = await this.productBranchRepo.findOne({
-      where: { id, branch: { id: branchId } },
-      relations: ['product', 'branch'],
-    });
-    if (!record) {
-      throw new NotFoundException(`ProductBranch with ID ${id} not found in your branch`);
-    }
-    return record;
-  }
+  // async findOne(id: number, branchId: number) {
+  //   const record = await this.productBranchRepo.findOne({
+  //     where: { id, branch: { id: branchId } },
+  //     relations: ['product', 'branch'],
+  //   });
+  //   if (!record) {
+  //     throw new NotFoundException(`ProductBranch with ID ${id} not found in your branch`);
+  //   }
+  //   return record;
+  // }
 
   async updateAvailability(id: number, dto: UpdateProductBranchStatusDto, branchId: number) {
     const record = await this.productBranchRepo.findOne({
