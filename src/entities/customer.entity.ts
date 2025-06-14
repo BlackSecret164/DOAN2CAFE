@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
 import { Order } from './order_tb.entity';
+import { Rating } from './rating.entity';
 
 @Entity({ name: 'customer' })
 export class Customer {
@@ -26,4 +27,7 @@ export class Customer {
 
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
+
+  @OneToMany(() => Rating, (rating) => rating.customer)
+  ratings: Rating[];
 }

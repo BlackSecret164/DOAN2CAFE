@@ -3,6 +3,7 @@ import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { OrderDetails } from './order-details.entity';
 import { ProductMaterial } from './product-material.entity';
 import { ProductSize } from './product_size.entity';
+import { Rating } from './rating.entity';
 
 @Entity({ name: 'product' })
 export class Product {
@@ -45,4 +46,6 @@ export class Product {
   @OneToMany(() => ProductSize, (size) => size.product, { cascade: true })
   sizes: ProductSize[];
 
+  @OneToMany(() => Rating, (rating) => rating.product)
+  ratings: Rating[];
 }
