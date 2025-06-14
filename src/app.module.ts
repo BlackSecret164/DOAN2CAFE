@@ -17,6 +17,7 @@ import { BranchStaffModule } from './modules/branchstaff.module';
 import { ProductBranchModule } from './modules/product_branch.module';
 import { BranchOrderModule } from './modules/branch_order.module';
 import { RatingModule } from './modules/rating.module';
+import { BranchMaterialModule } from './modules/branch_material.module';
 import typeorm from './commons/TypeORMConfig';
 import { envFiles } from './commons/Constant';
 // import thêm các entity khác ở đây
@@ -39,6 +40,7 @@ import { envFiles } from './commons/Constant';
     BranchStaffModule,
     TableModule,
     RawMaterialModule,
+    BranchMaterialModule,
     CustomerModule,
     ProductModule,
     ProductBranchModule,

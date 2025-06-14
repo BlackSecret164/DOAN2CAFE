@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateBranchDto } from '../dtos/branches.dto';
 import { ProductBranch } from '../entities/product_branch.entity';
 import { Product } from '../entities/product.entity';
+import { RawMaterial } from '../entities/rawmaterial.entity';
+import { BranchMaterial } from '../entities/branch_material.entity';
 
 @Injectable()
 export class BranchService {
@@ -15,6 +17,10 @@ export class BranchService {
     private readonly productRepo: Repository<Product>,
     @InjectRepository(ProductBranch)
     private readonly productBranchRepo: Repository<ProductBranch>,
+    @InjectRepository(RawMaterial)
+    private rawMaterialRepo: Repository<RawMaterial>,
+    @InjectRepository(BranchMaterial)
+    private readonly branchMaterialRepo: Repository<BranchMaterial>,
   ) { }
 
   async findAll(): Promise<Branch[]> {
@@ -74,6 +80,21 @@ export class BranchService {
 
     // Lưu các bản ghi product_branch
     await this.productBranchRepo.save(productBranches);
+
+    const rawmaterials = await this.rawMaterialRepo.find();
+
+    const branchMaterials = rawmaterials.map((rawMaterial) => {
+      const entry = new BranchMaterial();
+      entry.rawMaterial = rawMaterial;
+      entry.branch = branch;
+      entry.quantityImported = 0;
+      entry.quantityStock = 0;
+      entry.importDate = new Date(); // có thể null nếu muốn
+      entry.expiryDate = new Date(); // có thể null nếu muốn
+      return entry;
+    });
+
+    await this.branchMaterialRepo.save(branchMaterials);
 
     return branch;
   }

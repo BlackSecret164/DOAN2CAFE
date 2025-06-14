@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColum
 import { Staff } from './staff.entity';
 import { Table } from './tables.entity';
 import { Order } from './order_tb.entity';
+import { BranchMaterial } from './branch_material.entity';
 
 @Entity('branches')
 export class Branch {
@@ -35,4 +36,7 @@ export class Branch {
   @ManyToOne(() => Staff, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'managerid' })
   manager: Staff;
+
+  @OneToMany(() => BranchMaterial, (branchMaterial) => branchMaterial.branch)
+  branchMaterials: BranchMaterial[];
 }

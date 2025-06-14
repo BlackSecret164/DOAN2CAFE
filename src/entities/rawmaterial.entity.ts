@@ -1,32 +1,27 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinTable } from 'typeorm';
 import { Product } from './product.entity';
 import { ProductMaterial } from './product-material.entity';
+import { BranchMaterial } from './branch_material.entity';
 
 @Entity('rawmaterial')
 export class RawMaterial {
-  @PrimaryGeneratedColumn({ name: 'id' })
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'name', length: 100 })
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
-  @Column('integer', { name: 'quantityimported' })
-  quantityImported: number;
-
-  @Column('integer', { name: 'quantitystock', nullable: true })
-  quantityStock: number;
-
-  @Column('decimal', { name: 'price' })
+  @Column({ type: 'numeric', precision: 10, scale: 2 })
   price: number;
 
-  @Column({ name: 'storagetype', length: 20 })
-  storageType: string;
+  @Column({ name: 'storagetype',
+    type: 'varchar',
+    length: 20,
+  })
+  storageType: string; // e.g. CẤP ĐÔNG, ĐỂ NGOÀI
 
-  @Column('date', { name: 'importdate' })
-  importDate: string;
-
-  @Column('date', { name: 'expirydate' })
-  expiryDate: string;
+  @OneToMany(() => BranchMaterial, (branchMaterial) => branchMaterial.rawMaterial)
+  branchMaterials: BranchMaterial[];
 
   @OneToMany(() => ProductMaterial, (pm) => pm.rawMaterial)
   productMaterials: ProductMaterial[];

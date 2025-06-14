@@ -8,26 +8,9 @@ export class RawMaterialDto {
 
   @ApiProperty()
   @IsNumber()
-  quantityImported: number;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsNumber()
-  quantityStock: number;
-
-  @ApiProperty()
-  @IsNumber()
   price: number;
 
   @ApiProperty()
   @IsString()
   storageType: string;
-
-  @ApiProperty()
-  @IsDate()
-  importDate: string;
-
-  @ApiProperty()
-  @IsDate()
-  expiryDate: string;
 }
