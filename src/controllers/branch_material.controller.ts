@@ -26,18 +26,18 @@ export class BranchMaterialController {
         return this.branchMaterialService.findOneByIdForBranch(req.user.branchId, id);
     }
 
-    @Post()
-    create(@Req() req, @Body() dto: CreateBranchMaterialDto) {
-        return this.branchMaterialService.createForBranch(req.user.branchId, dto);
-    }
+    // @Post()
+    // create(@Req() req, @Body() dto: CreateBranchMaterialDto) {
+    //     return this.branchMaterialService.createForBranch(req.user.branchId, dto);
+    // }
 
     @Put(':id')
     update(@Req() req, @Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBranchMaterialDto) {
         return this.branchMaterialService.updateForBranch(req.user.branchId, id, dto);
     }
 
-    @Delete(':id')
-    remove(@Req() req, @Param('id', ParseIntPipe) id: number) {
-        return this.branchMaterialService.removeForBranch(req.user.branchId, id);
-    }
+    // @Delete(':id')
+    // remove(@Req() req, @Param('id', ParseIntPipe) id: number) {
+    //     return this.branchMaterialService.removeForBranch(req.user.branchId, id);
+    // }
 }
