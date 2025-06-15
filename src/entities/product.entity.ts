@@ -4,6 +4,7 @@ import { OrderDetails } from './order-details.entity';
 import { ProductMaterial } from './product-material.entity';
 import { ProductSize } from './product_size.entity';
 import { Rating } from './rating.entity';
+import { ProductBranch } from './product_branch.entity';
 
 @Entity({ name: 'product' })
 export class Product {
@@ -31,7 +32,7 @@ export class Product {
   @Column({ type: 'boolean', default: false })
   cold: boolean;
 
-  @Column({ name:'ispopular', type: 'boolean', default: false })
+  @Column({ name: 'ispopular', type: 'boolean', default: false })
   isPopular: boolean;
 
   @Column({ name: 'isnew', type: 'boolean', default: false })
@@ -48,4 +49,7 @@ export class Product {
 
   @OneToMany(() => Rating, (rating) => rating.product)
   ratings: Rating[];
+
+  @OneToMany(() => ProductBranch, (pb) => pb.product)
+  productBranches: ProductBranch[];
 }

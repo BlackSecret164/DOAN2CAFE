@@ -15,7 +15,7 @@ import { EnumRoles } from 'src/enums/role.enum';
 // @Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('order')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrderService) { }
 
   @Get('/list')
   @ApiOperation({ summary: 'Get list of all orders' })
@@ -70,4 +70,26 @@ export class OrderController {
   addDetail(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateOrderDetailsDto) {
     return this.orderService.addDetail(id, dto);
   }*/
+
+  // -------- CUSTOMER ACCESS --------
+  @Get('customer/:phone')
+  getOrdersByCustomer(@Param('phone') phone: string) {
+    return this.orderService.findAllByCustomerPhone(phone);
+  }
+
+  @Get('customer/:phone/:id')
+  getOrderByCustomer(
+    @Param('phone') phone: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.orderService.findOneByCustomerPhone(id, phone);
+  }
+
+  @Put('customer/:phone/:id/cancel')
+  cancelByCustomer(
+    @Param('phone') phone: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.orderService.cancelByCustomer(id, phone);
+  }
 }

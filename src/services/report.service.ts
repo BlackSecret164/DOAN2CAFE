@@ -18,7 +18,7 @@ export class ReportService {
     @InjectRepository(Staff) private staffRepo: Repository<Staff>,
     @InjectRepository(Table) private tableRepo: Repository<Table>,
     @InjectRepository(OrderDetails) private orderDetailRepo: Repository<OrderDetails>,
-  ) {}
+  ) { }
 
   async getSystemReport() {
     // Tổng quan
@@ -137,4 +137,137 @@ export class ReportService {
       })),
     };
   }
+
+  async getBranchReport(branchId: number) {
+    // Tổng quan chi nhánh
+    const [totalPayment, totalProduct, totalCustomer, totalStaff, totalOrder, totalTable] = await Promise.all([
+      this.orderRepo.createQueryBuilder('o')
+        .select('SUM(o.totalprice)', 'sum')
+        .leftJoin('o.staff', 's')
+        .where('s.branchId = :branchId', { branchId })
+        .getRawOne(),
+      this.productRepo
+        .createQueryBuilder('p')
+        .leftJoin('p.productBranches', 'pb')
+        .where('pb.branchId = :branchId', { branchId })
+        .getCount(),
+      this.customerRepo.count(), // giả sử khách hàng không chia theo chi nhánh
+      this.staffRepo.count({ where: { branch: { id: branchId } } }),
+      this.orderRepo.createQueryBuilder('o')
+        .leftJoin('o.staff', 's')
+        .where('s.branchId = :branchId', { branchId })
+        .getCount(),
+      this.tableRepo.count({ where: { branch: { id: branchId } } }),
+    ]);
+
+    const query14DaysOrder = `
+    SELECT DATE(o.orderdate) AS date, COUNT(*) AS amount
+    FROM order_tb o
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1 AND o.orderdate >= NOW() - INTERVAL '14 days'
+    GROUP BY DATE(o.orderdate)
+    ORDER BY date ASC
+  `;
+    const query14DaysValue = `
+    SELECT DATE(o.orderdate) AS date, SUM(o.totalprice) AS amount
+    FROM order_tb o
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1 AND o.orderdate >= NOW() - INTERVAL '14 days'
+    GROUP BY DATE(o.orderdate)
+    ORDER BY date ASC
+  `;
+
+    const query30DaysOrder = `
+    SELECT DATE(o.orderdate) AS date, COUNT(*) AS amount
+    FROM order_tb o
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1 AND o.orderdate >= NOW() - INTERVAL '30 days'
+    GROUP BY DATE(o.orderdate)
+    ORDER BY date ASC
+  `;
+    const query30DaysValue = `
+    SELECT DATE(o.orderdate) AS date, SUM(o.totalprice) AS amount
+    FROM order_tb o
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1 AND o.orderdate >= NOW() - INTERVAL '30 days'
+    GROUP BY DATE(o.orderdate)
+    ORDER BY date ASC
+  `;
+
+    const [last14DaysOrder, last14DaysOrderValue, last30DaysOrder, last30DaysOrderValue] = await Promise.all([
+      this.dataSource.query(query14DaysOrder, [branchId]),
+      this.dataSource.query(query14DaysValue, [branchId]),
+      this.dataSource.query(query30DaysOrder, [branchId]),
+      this.dataSource.query(query30DaysValue, [branchId]),
+    ]);
+
+    const salesByCategory = await this.dataSource.query(`
+    SELECT p.category, COUNT(*) AS amount
+    FROM order_details od
+    JOIN product p ON od.productid = p.id
+    JOIN order_tb o ON od.orderid = o.id
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1
+    GROUP BY p.category
+  `, [branchId]);
+
+    const [serviceType] = await this.dataSource.query(`
+    SELECT 
+      SUM(CASE WHEN o.servicetype = 'Take Away' THEN 1 ELSE 0 END) AS takeAway,
+      SUM(CASE WHEN o.servicetype = 'Dine In' THEN 1 ELSE 0 END) AS dineIn
+    FROM order_tb o
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1
+  `, [branchId]);
+
+    const topProducts = await this.dataSource.query(`
+    SELECT p.name, COUNT(od.productid) AS amount
+    FROM order_details od
+    JOIN product p ON p.id = od.productid
+    JOIN order_tb o ON o.id = od.orderid
+    JOIN staff s ON o.staffid = s.id
+    WHERE s.branchid = $1
+    GROUP BY p.name
+    ORDER BY amount DESC
+    LIMIT 5
+  `, [branchId]);
+
+    return {
+      totalPayment: parseFloat(totalPayment?.sum) || 0,
+      totalProduct,
+      totalCustomer,
+      totalStaff,
+      totalOrder,
+      totalTable,
+      last14DaysOrder: last14DaysOrder.map(row => ({
+        date: row.date,
+        amount: parseInt(row.amount, 10),
+      })),
+      last14DaysOrderValue: last14DaysOrderValue.map(row => ({
+        date: row.date,
+        amount: parseFloat(row.amount),
+      })),
+      last30DaysOrder: last30DaysOrder.map(row => ({
+        date: row.date,
+        amount: parseInt(row.amount, 10),
+      })),
+      last30DaysOrderValue: last30DaysOrderValue.map(row => ({
+        date: row.date,
+        amount: parseFloat(row.amount),
+      })),
+      salesByCategory: salesByCategory.map(row => ({
+        category: row.category,
+        amount: parseInt(row.amount, 10),
+      })),
+      serviceType: {
+        takeAway: parseInt(serviceType.takeaway, 10),
+        dineIn: parseInt(serviceType.dinein, 10),
+      },
+      topProducts: topProducts.map(row => ({
+        name: row.name,
+        amount: parseInt(row.amount, 10),
+      })),
+    };
+  }
+
 }

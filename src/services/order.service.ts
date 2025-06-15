@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '../entities/order_tb.entity';
 import { Repository, DataSource } from 'typeorm';
-import { CreateOrderDto,UpdateOrderDto } from '../dtos/order.dto';
+import { CreateOrderDto, UpdateOrderDto } from '../dtos/order.dto';
 import { OrderDetails } from '../entities/order-details.entity';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { camelCase } from 'lodash';
@@ -15,70 +15,68 @@ export class OrderService {
     @InjectRepository(OrderDetails)
     private readonly detailRepo: Repository<OrderDetails>,
     private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
   async findAll() {
-  return this.orderRepo
-    .createQueryBuilder('order')
-    .leftJoin('order.staff', 'staff')
-    .leftJoin('order.details', 'detail')
-    .select([
-      'order.id AS id',
-      'order.phoneCustomer AS phone',
-      'order.serviceType AS "serviceType"',
-      'order.totalPrice AS "totalPrice"',
-      'order.tableID AS "tableID"',
-      'order.orderDate AS "orderDate"',
-      'order.status AS "status"',
-      'staff.name AS "staffName"',
-      'ARRAY_AGG(detail.productID) AS "productIDs"',
-    ])
-    .groupBy('order.id, staff.name')
-    .getRawMany();
+    return this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoin('order.staff', 'staff')
+      .leftJoin('order.details', 'detail')
+      .select([
+        'order.id AS id',
+        'order.phoneCustomer AS phone',
+        'order.serviceType AS "serviceType"',
+        'order.totalPrice AS "totalPrice"',
+        'order.tableID AS "tableID"',
+        'order.orderDate AS "orderDate"',
+        'order.status AS "status"',
+        'staff.name AS "staffName"',
+        'ARRAY_AGG(detail.productID) AS "productIDs"',
+      ])
+      .groupBy('order.id, staff.name')
+      .getRawMany();
   }
 
   async findLatest() {
-  const raw = await this.orderRepo
-    .createQueryBuilder('order')
-    .select([
-      'order.id AS id',
-      'order.phoneCustomer AS phone',
-      'order.serviceType AS "serviceType"',
-      'order.orderDate AS "orderDate"',
-      'order.tableID AS "tableID"',
-    ])
-    .orderBy('order.id', 'DESC')
-    .limit(1)
-    .getRawOne();
+    const raw = await this.orderRepo
+      .createQueryBuilder('order')
+      .select([
+        'order.id AS id',
+        'order.phoneCustomer AS phone',
+        'order.serviceType AS "serviceType"',
+        'order.orderDate AS "orderDate"',
+        'order.tableID AS "tableID"',
+      ])
+      .orderBy('order.id', 'DESC')
+      .limit(1)
+      .getRawOne();
 
-  if (!raw) {
-    throw new NotFoundException('No orders found');
+    if (!raw) {
+      throw new NotFoundException('No orders found');
+    }
+
+    return raw;
   }
 
-  return raw;
-}
-
-
-
   async findOne(id: number) {
-  const order = await this.orderRepo
-    .createQueryBuilder('order')
-    .leftJoin('order.staff', 'staff')
-    .leftJoin('order.details', 'detail')
-    .select([
-      'order.id AS id',
-      'order.phoneCustomer AS phone',
-      'order.serviceType AS "serviceType"',
-      'order.totalPrice AS "totalPrice"',
-      'order.tableID AS "tableID"',
-      'order.orderDate AS "orderDate"',
-      'order.status AS "status"',
-      'staff.name AS "staffName"',
-      'ARRAY_AGG(detail.productID) AS "productIDs"',
-    ])
-    .where('order.id = :id', { id })
-    .groupBy('order.id, staff.name')
-    .getRawOne();
+    const order = await this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoin('order.staff', 'staff')
+      .leftJoin('order.details', 'detail')
+      .select([
+        'order.id AS id',
+        'order.phoneCustomer AS phone',
+        'order.serviceType AS "serviceType"',
+        'order.totalPrice AS "totalPrice"',
+        'order.tableID AS "tableID"',
+        'order.orderDate AS "orderDate"',
+        'order.status AS "status"',
+        'staff.name AS "staffName"',
+        'ARRAY_AGG(detail.productID) AS "productIDs"',
+      ])
+      .where('order.id = :id', { id })
+      .groupBy('order.id, staff.name')
+      .getRawOne();
 
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -117,10 +115,66 @@ export class OrderService {
   }
 
   async addDetail(orderID: number, dto: CreateOrderDetailsDto) {
-  const detail = this.detailRepo.create({
-    ...dto,
-    order: { id: orderID },
-  });
-  return this.detailRepo.save(detail);
+    const detail = this.detailRepo.create({
+      ...dto,
+      order: { id: orderID },
+    });
+    return this.detailRepo.save(detail);
   }
+
+  async findAllByCustomerPhone(phone: string) {
+    return this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoin('order.details', 'detail')
+      .select([
+        'order.id AS id',
+        'order.serviceType AS "serviceType"',
+        'order.orderDate AS "orderDate"',
+        'order.status AS "status"',
+        'ARRAY_AGG(detail.productID) AS "productIDs"',
+      ])
+      .where('order.phoneCustomer = :phone', { phone })
+      .groupBy('order.id')
+      .orderBy('order.orderDate', 'DESC')
+      .getRawMany();
+  }
+
+  async findOneByCustomerPhone(id: number, phone: string) {
+    const order = await this.orderRepo
+      .createQueryBuilder('order')
+      .leftJoin('order.details', 'detail')
+      .select([
+        'order.id AS id',
+        'order.serviceType AS "serviceType"',
+        'order.orderDate AS "orderDate"',
+        'order.status AS "status"',
+        'order.totalPrice AS "totalPrice"',
+        'ARRAY_AGG(detail.productID) AS "productIDs"',
+      ])
+      .where('order.id = :id AND order.phoneCustomer = :phone', { id, phone })
+      .groupBy('order.id')
+      .getRawOne();
+
+    if (!order) {
+      throw new NotFoundException('Order not found or not yours');
+    }
+
+    return order;
+  }
+
+  async cancelByCustomer(id: number, phone: string) {
+    const result = await this.orderRepo
+      .createQueryBuilder()
+      .update(Order)
+      .set({ status: 'Đã hủy' })
+      .where('id = :id AND phoneCustomer = :phone', { id, phone })
+      .execute();
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Order not found or not yours');
+    }
+
+    return { message: 'Order cancelled by customer' };
+  }
+
 }

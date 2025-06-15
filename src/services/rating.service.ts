@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { CreateRatingDto, RatingResponseDto, UpdateRatingDto } from '../dtos/rating.dto';
 import { Customer } from '../entities/customer.entity';
 import { Product } from '../entities/product.entity';
+import { Order } from '../entities/order_tb.entity';
+import { OrderDetails } from '../entities/order-details.entity';
 
 @Injectable()
 export class RatingService {
@@ -15,6 +17,10 @@ export class RatingService {
         private readonly customerRepo: Repository<Customer>,
         @InjectRepository(Product)
         private readonly productRepo: Repository<Product>,
+        @InjectRepository(Order)
+        private readonly orderRepo: Repository<Order>,
+        @InjectRepository(OrderDetails)
+        private readonly detailRepo: Repository<OrderDetails>,
     ) { }
 
     async create(dto: CreateRatingDto) {
@@ -23,6 +29,17 @@ export class RatingService {
 
         if (!customer || !product) {
             throw new NotFoundException('Customer or Product not found');
+        }
+
+        const hasPurchased = await this.detailRepo
+            .createQueryBuilder('detail')
+            .innerJoin('detail.order', 'order')
+            .where('order.phoneCustomer = :phone', { phone: dto.phoneCustomer })
+            .andWhere('detail.productID = :productId', { productId: dto.productId })
+            .getExists();
+
+        if (!hasPurchased) {
+            throw new NotFoundException('Customer must purchase the product before rating');
         }
 
         const rating = this.ratingRepo.create({
