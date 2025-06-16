@@ -24,7 +24,7 @@ export class OrderService {
       .leftJoin('order.details', 'detail')
       .select([
         'order.id AS id',
-        'order.phoneCustomer AS phone',
+        'order.phoneCustomer AS "phoneCustomer"',
         'order.serviceType AS "serviceType"',
         'order.totalPrice AS "totalPrice"',
         'order.tableID AS "tableID"',
@@ -42,7 +42,7 @@ export class OrderService {
       .createQueryBuilder('order')
       .select([
         'order.id AS id',
-        'order.phoneCustomer AS phone',
+        'order.phoneCustomer AS "phoneCustomer"',
         'order.serviceType AS "serviceType"',
         'order.orderDate AS "orderDate"',
         'order.tableID AS "tableID"',
@@ -65,7 +65,7 @@ export class OrderService {
       .leftJoin('order.details', 'detail')
       .select([
         'order.id AS id',
-        'order.phoneCustomer AS phone',
+        'order.phoneCustomer AS "phoneCustomer"',
         'order.serviceType AS "serviceType"',
         'order.totalPrice AS "totalPrice"',
         'order.tableID AS "tableID"',
