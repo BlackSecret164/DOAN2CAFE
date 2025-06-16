@@ -35,11 +35,17 @@ export class OrderController {
     return this.orderService.findOne(id);
   }
 
-  /*@Post()
+  @Post()
   @ApiOperation({ summary: 'Create order only (no details)' })
   create(@Body() dto: CreateOrderDto) {
     return this.orderService.create(dto);
-  }*/
+  }
+
+  @Post('/detail/:id')
+  @ApiOperation({ summary: 'Add product to existing order' })
+  addDetail(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateOrderDetailsDto) {
+    return this.orderService.addDetail(id, dto);
+  }
 
   @Put(':id')
   @ApiOperation({ summary: 'Update order by ID' })
@@ -64,12 +70,6 @@ export class OrderController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.orderService.remove(id);
   }
-
-  /*@Post('/detail/:id')
-  @ApiOperation({ summary: 'Add product to existing order' })
-  addDetail(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateOrderDetailsDto) {
-    return this.orderService.addDetail(id, dto);
-  }*/
 
   // -------- CUSTOMER ACCESS --------
   @Get('customer/:phone')
