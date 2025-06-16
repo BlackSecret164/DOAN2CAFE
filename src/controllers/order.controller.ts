@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Param, Body, Delete, Put, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { OrderService } from '../services/order.service';
-import { CreateOrderDto } from '../dtos/order.dto';
+import { CreateOrderDto, CreateOrderCustomerDto, UpdateOrderCustomerDto } from '../dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -37,7 +37,7 @@ export class OrderController {
 
   @Post()
   @ApiOperation({ summary: 'Create order only (no details)' })
-  create(@Body() dto: CreateOrderDto) {
+  create(@Body() dto: CreateOrderCustomerDto) {
     return this.orderService.create(dto);
   }
 
@@ -49,7 +49,7 @@ export class OrderController {
 
   @Put(':id')
   @ApiOperation({ summary: 'Update order by ID' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() dto: CreateOrderDto) {
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateOrderCustomerDto) {
     return this.orderService.update(id, dto);
   }
 

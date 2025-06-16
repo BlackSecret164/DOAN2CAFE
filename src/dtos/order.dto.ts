@@ -68,3 +68,52 @@ export class UpdateOrderDto {
   @IsString()
   status: string;
 }
+
+export class CreateOrderCustomerDto {
+  @ApiProperty()
+  @IsString()
+  phoneCustomer: string;
+
+  @ApiProperty()
+  @IsString()
+  serviceType: string;
+
+  @ApiProperty()
+  @IsDateString()
+  orderDate: string;
+
+  @ApiProperty()
+  @IsString()
+  status: string;
+
+  @ApiProperty({ type: [Number] })
+  @IsArray()
+  productIDs: number[];
+
+  @ApiProperty()
+  @IsInt()
+  branchId: number;
+}
+
+export class UpdateOrderCustomerDto {
+  @ApiProperty()
+  @IsString()
+  phoneCustomer: string;
+
+  @ApiProperty()
+  @IsString()
+  serviceType: string;
+
+  @ApiProperty()
+  @IsInt()
+  @Min(0)
+  totalPrice: number;
+
+  @ApiProperty()
+  @IsDateString()
+  orderDate: string;
+
+  @ApiProperty()
+  @IsString()
+  status: string;
+}

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from '../entities/order_tb.entity';
 import { Repository, DataSource } from 'typeorm';
-import { CreateOrderDto, UpdateOrderDto } from '../dtos/order.dto';
+import { CreateOrderDto, UpdateOrderCustomerDto, CreateOrderCustomerDto } from '../dtos/order.dto';
 import { OrderDetails } from '../entities/order-details.entity';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { camelCase } from 'lodash';
@@ -85,12 +85,12 @@ export class OrderService {
     return order;
   }
 
-  async create(dto: CreateOrderDto) {
+  async create(dto: CreateOrderCustomerDto) {
     const order = this.orderRepo.create(dto);
     return this.orderRepo.save(order);
   }
 
-  async update(id: number, dto: UpdateOrderDto) {
+  async update(id: number, dto: UpdateOrderCustomerDto) {
     const result = await this.orderRepo.update(id, dto);
     if (result.affected === 0) throw new NotFoundException(`Order ${id} not found`);
     return { message: 'Order edited successfully' };
