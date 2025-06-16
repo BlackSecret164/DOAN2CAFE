@@ -100,6 +100,8 @@ export class CartService {
         if (!item) throw new NotFoundException('Cart item not found');
 
         item.quantity = dto.quantity;
+        item.size = dto.size;
+        item.mood = dto.mood;
         return this.cartRepo.save(item);
     }
 

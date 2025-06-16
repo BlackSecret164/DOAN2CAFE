@@ -41,4 +41,12 @@ export class CreateCartItemDto {
 
 export class UpdateCartItemDto {
   @ApiProperty() @IsNumber() quantity: number;
+
+  @ApiProperty()
+  @IsString()
+  size: string;
+
+  @ApiProperty()
+  @IsString()
+  mood: string;
 }
