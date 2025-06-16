@@ -44,10 +44,15 @@ export class ProductService {
       cold: product.cold,
       isPopular: product.isPopular,
       isNew: product.isNew,
-      sizes: product.sizes.map((s) => ({
-        sizeName: s.sizeName,
-        price: s.price,
-      })),
+      sizes: product.sizes
+        .sort((a, b) => {
+          const order = { 'S': 1, 'M': 2, 'L': 3 };
+          return order[a.sizeName] - order[b.sizeName];
+        })
+        .map((s) => ({
+          sizeName: s.sizeName,
+          price: s.price,
+        })),
       materials: product.productMaterials.map((pm) => ({
         name: pm.rawMaterial.name,
       })),
@@ -74,10 +79,15 @@ export class ProductService {
       cold: product.cold,
       isPopular: product.isPopular,
       isNew: product.isNew,
-      sizes: product.sizes.map((s) => ({
-        sizeName: s.sizeName,
-        price: s.price,
-      })),
+      sizes: product.sizes
+        .sort((a, b) => {
+          const order = { 'S': 1, 'M': 2, 'L': 3 };
+          return order[a.sizeName] - order[b.sizeName];
+        })
+        .map((s) => ({
+          sizeName: s.sizeName,
+          price: s.price,
+        })),
       materials: product.productMaterials.map((pm) => ({
         name: pm.rawMaterial.name,
       })),
