@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Param, Body, Delete, Put, Query } from '@nestjs/common';
 import { CustomerService } from '../services/customer.service';
-import { CreateCustomerDto } from '../dtos/customer.dto';
+import { CreateCustomerDto, UpdateCustomerDto } from '../dtos/customer.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Customer } from '../entities/customer.entity';
 
@@ -51,7 +51,7 @@ export class CustomerController {
   @ApiOperation({ summary: 'Update customer' })
   @ApiResponse({ status: 200, description: 'Customer updated', type: Customer })
   @ApiResponse({ status: 404, description: 'Customer not found' })
-  update(@Param('id') id: number, @Body() updateCustomerDto: CreateCustomerDto) {
+  update(@Param('id') id: number, @Body() updateCustomerDto: UpdateCustomerDto) {
     return this.customerService.update(id, updateCustomerDto);
   }
 

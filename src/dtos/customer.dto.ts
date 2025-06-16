@@ -35,4 +35,32 @@ export class CreateCustomerDto {
   @IsString()
   @IsOptional()
   rank: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address: string;
+
+  @ApiProperty({ example: 'https://image.url' })
+  image: string;
+}
+
+export class UpdateCustomerDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  gender: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address: string;
+
+  @ApiProperty({ example: 'https://image.url' })
+  image: string;
 }

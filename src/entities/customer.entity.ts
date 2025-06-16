@@ -26,6 +26,12 @@ export class Customer {
   @Column({ name: 'rank', length: 10, nullable: true })
   rank: string;
 
+  @Column({ length: 255 })
+  image: string;
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  address: string;
+
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
 
