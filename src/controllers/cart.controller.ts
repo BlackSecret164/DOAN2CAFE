@@ -30,7 +30,7 @@ export class CartController {
 
   @Put(':id')
   updateQuantity(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCartItemDto) {
-    return this.cartService.updateQuantity(id, dto);
+    return this.cartService.updateItem(id, dto);
   }
 
   @Delete(':id')
