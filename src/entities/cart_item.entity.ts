@@ -10,12 +10,6 @@ export class CartItem {
     @ApiProperty()
     id: number;
 
-    @Column({ name: 'sessionid', nullable: true })
-    @ApiProperty({ required: false })
-    @IsOptional()
-    @IsString()
-    sessionId?: string;
-
     @Column()
     @ApiProperty()
     @IsNumber()
