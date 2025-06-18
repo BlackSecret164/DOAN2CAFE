@@ -91,33 +91,73 @@ export class AuthService {
   }
 
   async callback(authHeader: string) {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new UnauthorizedException('Unauthorized');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+
+    const token = authHeader.split(' ')[1];
+    const decoded = this.jwtService.verify(token);
+
+    if (!decoded || !decoded.type) {
+      throw new UnauthorizedException('Invalid token');
+    }
+
+    // STAFF CASE
+    if (decoded.type === 'staff') {
+      const staffID = decoded.id;
+
+      const userResult = await this.dataSource.query(
+        `SELECT id, name, gender, birth, address, phone, workhours as "workHours", minsalary, typestaff as "typeStaff", role, image
+       FROM staff WHERE id = $1`,
+        [staffID],
+      );
+
+      if (userResult.length === 0) {
+        throw new UnauthorizedException('Staff not found');
+      }
+
+      const user = userResult[0];
+
+      // Ghi log
+      await this.dataSource.query(
+        `INSERT INTO activity_logs (staffid, action, timestamp) VALUES ($1, $2, $3)`,
+        [user.id, 'User accessed callback API', new Date()],
+      );
+
+      return {
+        msg: 'ok',
+        data: {
+          ...user,
+          type: 'staff',
+        },
+      };
+    }
+
+    // CUSTOMER CASE
+    if (decoded.type === 'customer') {
+      const phone = decoded.phone;
+
+      const userResult = await this.dataSource.query(
+        `SELECT phone, name, address, gender, total, rank, image
+       FROM customer WHERE phone = $1`,
+        [phone],
+      );
+
+      if (userResult.length === 0) {
+        throw new UnauthorizedException('Customer not found');
+      }
+
+      const user = userResult[0];
+
+      return {
+        msg: 'ok',
+        data: {
+          ...user,
+          type: 'customer',
+        },
+      };
+    }
+
+    throw new UnauthorizedException('Unsupported user type');
   }
-
-  const token = authHeader.split(' ')[1];
-  const decoded = this.jwtService.verify(token);
-  const staffID = decoded.id;
-
-  const userResult = await this.dataSource.query(
-    `SELECT id, name, gender, birth, address, phone, workhours as "workHours", minsalary, typestaff as "typeStaff", role FROM staff WHERE id = $1`,
-    [staffID],
-  );
-
-  if (userResult.length === 0) {
-    throw new UnauthorizedException('Unauthorized');
-  }
-
-  const user = userResult[0];
-
-  await this.dataSource.query(
-    `INSERT INTO activity_logs (staffid, action, timestamp) VALUES ($1, $2, $3)`,
-    [user.id, 'User accessed callback API', new Date()],
-  );
-
-  return {
-    msg: 'ok',
-    data: user,
-  };
-}
 }
