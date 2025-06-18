@@ -32,6 +32,9 @@ export class Customer {
   @Column({ type: 'varchar', length: 100, nullable: true })
   address: string;
 
+  @Column({ type: 'varchar', length: 255 })
+  password: string;
+
   @OneToMany(() => Order, (order) => order.customer)
   orders: Order[];
 

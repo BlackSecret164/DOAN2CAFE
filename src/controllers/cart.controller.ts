@@ -7,7 +7,7 @@ import {
   Body,
   Param,
   Query,
-  BadRequestException, ParseIntPipe
+  BadRequestException,
 } from '@nestjs/common';
 import { CartService } from '../services/cart.service';
 import { CreateCartItemDto, UpdateCartItemDto } from '../dtos/cart.dto';
@@ -19,28 +19,58 @@ export class CartController {
   constructor(private readonly cartService: CartService) {}
 
   @Get()
-  getCart(@Query('phoneCustomer') phone: string) {
-    return this.cartService.findAll(phone);
+  @ApiQuery({ name: 'phoneCustomer', required: false })
+  @ApiQuery({ name: 'sessionId', required: false })
+  async findAll(
+    @Query('phoneCustomer') phoneCustomer?: string,
+    @Query('sessionId') sessionId?: string,
+  ) {
+    return this.cartService.findAll(phoneCustomer, sessionId);
   }
 
   @Post()
-  addItem(@Body() dto: CreateCartItemDto) {
+  async create(@Body() dto: CreateCartItemDto) {
     return this.cartService.create(dto);
   }
 
   @Put(':id')
-  updateQuantity(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCartItemDto) {
-    return this.cartService.updateItem(id, dto);
+  async update(@Param('id') id: number, @Body() dto: UpdateCartItemDto) {
+    return this.cartService.updateQuantity(id, dto);
   }
 
   @Delete(':id')
-  removeItem(@Param('id', ParseIntPipe) id: number) {
+  async remove(@Param('id') id: number) {
     return this.cartService.remove(id);
   }
 
   @Delete()
-  clearCart(@Query('phoneCustomer') phone: string) {
-    return this.cartService.clearCart(phone);
+  @ApiQuery({ name: 'phoneCustomer', required: false })
+  @ApiQuery({ name: 'sessionId', required: false })
+  async clearCart(
+    @Query('phoneCustomer') phoneCustomer?: string,
+    @Query('sessionId') sessionId?: string,
+  ) {
+    if (!phoneCustomer && !sessionId) {
+      throw new BadRequestException('phoneCustomer or sessionId is required');
+    }
+
+    if (phoneCustomer) {
+      return this.cartService.clearCart(phoneCustomer);
+    }
+
+    return this.cartService.clearCart(sessionId);
+  }
+
+  @Post('migrate')
+  @ApiQuery({ name: 'sessionId', required: true })
+  @ApiQuery({ name: 'phoneCustomer', required: true })
+  async migrate(
+    @Query('sessionId') sessionId: string,
+    @Query('phoneCustomer') phoneCustomer: string,
+  ) {
+    if (!sessionId || !phoneCustomer) {
+      throw new BadRequestException('sessionId and phoneCustomer are required');
+    }
+    return this.cartService.migrateSessionToCustomer(sessionId, phoneCustomer);
   }
 }
-

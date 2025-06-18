@@ -12,84 +12,96 @@ import { AddToCartDto, UpdateCartItemDto, CreateCartItemDto } from '../dtos/cart
 export class CartService {
     constructor(
         @InjectRepository(CartItem) private cartRepo: Repository<CartItem>,
-        @InjectRepository(Product) private productRepo: Repository<Product>,
+        @InjectRepository(CartItem) private cartItemRepo: Repository<CartItem>,
         @InjectRepository(Customer) private customerRepo: Repository<Customer>,
-        @InjectRepository(ProductSize) private productSizeRepo: Repository<ProductSize>
+        @InjectRepository(Product) private productRepo: Repository<Product>,
+        @InjectRepository(ProductSize) private productSizeRepo: Repository<ProductSize>,
     ) { }
 
-    async findAll(phoneCustomer: string) {
-        const items = await this.cartRepo.find({
-            where: { phoneCustomer },
-            relations: ['product'],
-        });
+    async findAll(phoneCustomer?: string, sessionId?: string) {
+        const where: any = {};
+        if (phoneCustomer) where.phoneCustomer = phoneCustomer;
+        else if (sessionId) where.sessionId = sessionId;
+        else throw new BadRequestException('phoneCustomer or sessionId is required');
 
-        return Promise.all(
-            items.map(async (item) => {
-                const size = await this.productSizeRepo.findOne({
-                    where: { product: { id: item.product.id }, sizeName: item.size },
-                });
+        const items = await this.cartItemRepo.find({ where, relations: ['product'] });
 
-                return {
-                    id: item.id,
-                    quantity: item.quantity,
-                    size: item.size,
-                    productId: item.product.id,
-                    name: item.product.name,
-                    image: item.product.image,
-                    price: size?.price ?? 0,
-                };
-            })
-        );
+        const result = [];
+
+        for (const item of items) {
+            const productSize = await this.productSizeRepo.findOne({
+                where: { product: { id: item.product.id }, sizeName: item.size }
+            });
+
+            result.push({
+                id: item.id,
+                quantity: item.quantity,
+                size: item.size,
+                mood: item.mood,
+                productId: item.product.id,
+                name: item.product.name,
+                image: item.product.image,
+                price: productSize?.price ?? 0
+            });
+        }
+
+        return result;
     }
 
     async create(dto: CreateCartItemDto) {
         const product = await this.productRepo.findOne({ where: { id: dto.productId } });
         if (!product) throw new NotFoundException('Product not found');
 
-        const customer = await this.customerRepo.findOne({ where: { phone: dto.phoneCustomer } });
-        if (!customer) throw new NotFoundException('Customer not found');
-
-        const existing = await this.cartRepo.findOne({
-            where: {
-                phoneCustomer: dto.phoneCustomer,
-                product: { id: dto.productId },
-                size: dto.size,
-                mood: dto.mood,
-            },
-        });
-
-        if (existing) {
-            existing.quantity += dto.quantity;
-            return this.cartRepo.save(existing);
+        if (!dto.phoneCustomer && !dto.sessionId) {
+            throw new BadRequestException('Either phoneCustomer or sessionId is required');
         }
 
-        const newItem = this.cartRepo.create({
-            product,
+        // Kiểm tra xem đã tồn tại cart item chưa
+        const existingItem = await this.cartItemRepo.findOne({
+            where: [
+                { phoneCustomer: dto.phoneCustomer, product: { id: dto.productId }, size: dto.size, mood: dto.mood },
+                { sessionId: dto.sessionId, product: { id: dto.productId }, size: dto.size, mood: dto.mood }
+            ],
+            relations: ['product']
+        });
+
+        if (existingItem) {
+            existingItem.quantity += dto.quantity;
+            return this.cartItemRepo.save(existingItem);
+        }
+
+        const cartItem = this.cartItemRepo.create({
+            quantity: dto.quantity,
             size: dto.size,
             mood: dto.mood,
-            quantity: dto.quantity,
-            phoneCustomer: dto.phoneCustomer,
+            sessionId: dto.sessionId || null,
+            phoneCustomer: dto.phoneCustomer || null,
+            product
         });
 
-        return this.cartRepo.save(newItem);
+        return this.cartItemRepo.save(cartItem);
     }
 
-    async updateItem(id: number, dto: UpdateCartItemDto) {
-        const item = await this.cartRepo.findOne({ where: { id }, relations: ['product'] });
+    async migrateSessionToCustomer(sessionId: string, phoneCustomer: string) {
+        const items = await this.cartItemRepo.find({
+            where: { sessionId },
+        });
+
+        for (const item of items) {
+            item.phoneCustomer = phoneCustomer;
+            item.sessionId = null;
+        }
+
+        return this.cartItemRepo.save(items);
+    }
+
+    async updateQuantity(id: number, dto: UpdateCartItemDto) {
+        const item = await this.cartRepo.findOne({ where: { id } });
         if (!item) throw new NotFoundException('Cart item not found');
 
-        if (dto.quantity !== undefined) {
-            item.quantity = dto.quantity;
-        }
-
-        if (dto.size !== undefined) {
-            item.size = dto.size;
-        }
-
-        if (dto.mood !== undefined) {
-            item.mood = dto.mood;
-        }
-
+        item.quantity = dto.quantity;
+        item.size = dto.size;
+        item.mood = dto.mood;
         return this.cartRepo.save(item);
     }
 
@@ -99,8 +111,11 @@ export class CartService {
         return { message: 'Deleted' };
     }
 
-    async clearCart(phoneCustomer: string) {
-        await this.cartRepo.delete({ phoneCustomer });
+    async clearCart(phone: string) {
+        const customer = await this.customerRepo.findOne({ where: { phone } });
+        if (!customer) throw new NotFoundException('Customer not found');
+
+        await this.cartRepo.delete({ customer });
         return { message: 'Cart cleared' };
     }
 }

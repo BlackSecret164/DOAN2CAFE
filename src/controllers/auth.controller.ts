@@ -6,11 +6,11 @@ import { StaffSigninDto } from '../dtos/auth.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('signin')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Đăng nhập' })
+  @ApiOperation({ summary: 'Đăng nhập (staff hoặc customer)' })
   async signin(@Body() dto: StaffSigninDto) {
     return this.authService.signin(dto);
   }

@@ -31,6 +31,11 @@ export class CreateCartItemDto {
   @IsOptional()
   @IsString()
   phoneCustomer?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
 }
 
 

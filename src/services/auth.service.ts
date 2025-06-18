@@ -10,74 +10,114 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     @InjectDataSource() private readonly dataSource: DataSource,
-  ) {}
+  ) { }
 
+  // src/services/auth.service.ts
   async signin(dto: StaffSigninDto) {
-    const { phone, password } = dto;
+    const { phone, password, userType } = dto;
 
-    const result = await this.dataSource.query(
-      'SELECT * FROM staff WHERE phone = $1',
-      [phone],
-    );
+    let userQuery = '';
+    let tokenPayload: any = {};
+    let user: any;
 
-    if (result.length === 0) {
-      throw new UnauthorizedException('Phone number not found!');
-    }
+    if (userType === 'staff') {
+      const result = await this.dataSource.query('SELECT * FROM staff WHERE phone = $1', [phone]);
 
-    const user = result[0];
+      if (result.length === 0) {
+        throw new UnauthorizedException('Staff not found!');
+      }
 
-    if (user.password !== password) {
-      throw new UnauthorizedException('Invalid password!');
-    }
+      user = result[0];
+      if (user.password !== password) {
+        throw new UnauthorizedException('Invalid password!');
+      }
 
-    const token = this.jwtService.sign({
-      id: user.id,
-      phone: user.phone,
-      role: user.role,
-      branchId: user.branchid,
-    });
-
-    return {
-      message: 'Signin successful!',
-      token,
-      user: {
+      tokenPayload = {
         id: user.id,
-        name: user.name,
         phone: user.phone,
         role: user.role,
         branchId: user.branchid,
-      },
-    };
+        type: 'staff',
+      };
+
+      return {
+        message: 'Staff signin successful!',
+        token: this.jwtService.sign(tokenPayload),
+        user: {
+          id: user.id,
+          name: user.name,
+          phone: user.phone,
+          role: user.role,
+          branchId: user.branchid,
+        },
+      };
+    }
+
+    if (userType === 'customer') {
+      const result = await this.dataSource.query(
+        'SELECT * FROM customer WHERE phone = $1',
+        [phone],
+      );
+
+      if (result.length === 0) {
+        throw new UnauthorizedException('Customer not found!');
+      }
+
+      user = result[0];
+
+      if (user.password !== password) {
+        throw new UnauthorizedException('Invalid password!');
+      }
+
+      tokenPayload = {
+        phone: user.phone,
+        name: user.name,
+        role: 'CUSTOMER', // Gán mặc định
+        type: 'customer',
+      };
+
+      return {
+        message: 'Customer signin successful!',
+        token: this.jwtService.sign(tokenPayload),
+        user: {
+          phone: user.phone,
+          name: user.name,
+          rank: user.rank,
+          role: 'CUSTOMER', // Gán mặc định trong response
+        },
+      };
+    }
+    throw new UnauthorizedException('Invalid user type');
   }
 
   async callback(authHeader: string) {
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
-    const token = authHeader.split(' ')[1];
-    const decoded = this.jwtService.verify(token);
-    const staffID = decoded.id;
-
-    const userResult = await this.dataSource.query(
-      `SELECT id, name, gender, birth, address, phone, workhours as "workHours", minsalary, typestaff as "typeStaff", role FROM staff WHERE id = $1`,
-      [staffID],
-    );
-
-    if (userResult.length === 0) {
-      throw new UnauthorizedException('Unauthorized');
-    }
-
-    const user = userResult[0];
-
-    await this.dataSource.query(
-      `INSERT INTO activity_logs (staffid, action, timestamp) VALUES ($1, $2, $3)`,
-      [user.id, 'User accessed callback API', new Date()],
-    );
-
-    return {
-      msg: 'ok',
-      data: user,
-    };
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new UnauthorizedException('Unauthorized');
   }
+
+  const token = authHeader.split(' ')[1];
+  const decoded = this.jwtService.verify(token);
+  const staffID = decoded.id;
+
+  const userResult = await this.dataSource.query(
+    `SELECT id, name, gender, birth, address, phone, workhours as "workHours", minsalary, typestaff as "typeStaff", role FROM staff WHERE id = $1`,
+    [staffID],
+  );
+
+  if (userResult.length === 0) {
+    throw new UnauthorizedException('Unauthorized');
+  }
+
+  const user = userResult[0];
+
+  await this.dataSource.query(
+    `INSERT INTO activity_logs (staffid, action, timestamp) VALUES ($1, $2, $3)`,
+    [user.id, 'User accessed callback API', new Date()],
+  );
+
+  return {
+    msg: 'ok',
+    data: user,
+  };
+}
 }
