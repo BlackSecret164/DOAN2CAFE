@@ -10,7 +10,7 @@ export class UserModal{
     workHours: number;
     salary: number;
     minsalary: number;
-    typestaff: string;
+    typeStaff: string;
     startDate: Date;
     activeStatus: boolean;
     password: string;
@@ -29,7 +29,7 @@ export class UserModal{
         this.workHours = user.workHours;
         this.salary = user.salary;
         this.minsalary = user.minsalary;
-        this.typestaff = user.typestaff;
+        this.typeStaff = user.typeStaff;
         this.startDate = user.startDate;
         this.activeStatus = user.activeStatus;
         this.password = user.password;
