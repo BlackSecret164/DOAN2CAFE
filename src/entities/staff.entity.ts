@@ -41,8 +41,8 @@ export class Staff {
   @Column({ type: 'int', name: 'minsalary', default: 30000 })
   minsalary: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  typestaff: string;
+  @Column({ type: 'varchar', name: 'typestaff', length: 50, nullable: true })
+  typeStaff: string;
 
   @Column({ type: 'date', name: 'startdate', nullable: true })
   startDate: Date;
@@ -65,6 +65,9 @@ export class Staff {
 
   @Column({ type: 'int', name: 'branchid', nullable: true })
   branchId: number;
+
+  @Column({ length: 255 })
+  image: string;
 
   @ManyToOne(() => Branch, (branch) => branch.staff, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'branchid' })

@@ -34,6 +34,10 @@ export class StaffDto {
   salary: number;
 
   @ApiProperty()
+  @IsString()
+  typeStaff: string;
+
+  @ApiProperty()
   @IsOptional()
   @IsDate()
   startDate: string;
