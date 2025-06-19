@@ -17,3 +17,26 @@ export class StaffSigninDto {
   @IsIn(['staff', 'customer'])
   userType: 'staff' | 'customer';
 }
+
+export class RegisterCustomerDto {
+  @ApiProperty()
+  @IsString()
+  phone: string;
+
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  gender: string;
+
+  @ApiProperty()
+  @IsString()
+  address: string;
+
+  @ApiProperty()
+  @IsString()
+  password: string;
+}
+

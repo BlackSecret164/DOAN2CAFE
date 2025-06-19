@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { StaffDto } from '../dtos/staff.dto';
-import { StaffSigninDto } from '../dtos/auth.dto';
+import { StaffSigninDto, RegisterCustomerDto } from '../dtos/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -88,6 +88,48 @@ export class AuthService {
       };
     }
     throw new UnauthorizedException('Invalid user type');
+  }
+
+  async registerCustomer(dto: RegisterCustomerDto) {
+    const { phone, name, gender, address, password } = dto;
+
+    // Kiểm tra số điện thoại đã tồn tại chưa
+    const existing = await this.dataSource.query(
+      'SELECT * FROM customer WHERE phone = $1',
+      [phone],
+    );
+
+    if (existing.length > 0) {
+      throw new UnauthorizedException('Số điện thoại đã được đăng ký');
+    }
+
+    const registrationDate = new Date();
+
+    // Thêm khách hàng mới
+    await this.dataSource.query(
+      `INSERT INTO customer (phone, name, gender, address, password, registrationdate)
+     VALUES ($1, $2, $3, $4, $5, $6)`,
+      [phone, name, gender, address, password, registrationDate],
+    );
+
+    const tokenPayload = {
+      phone,
+      name,
+      role: 'CUSTOMER',
+      type: 'customer',
+    };
+
+    return {
+      message: 'Đăng ký thành công!',
+      token: this.jwtService.sign(tokenPayload),
+      user: {
+        phone,
+        name,
+        gender,
+        address,
+        role: 'CUSTOMER',
+      },
+    };
   }
 
   async callback(authHeader: string) {
