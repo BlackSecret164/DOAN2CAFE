@@ -81,8 +81,9 @@ export class ReportService {
     // Thống kê Takeaway / Dine-in
     const [serviceType] = await this.dataSource.query(`
       SELECT 
-        SUM(CASE WHEN servicetype = 'Take Away' THEN 1 ELSE 0 END) AS takeAway,
-        SUM(CASE WHEN servicetype = 'Dine In' THEN 1 ELSE 0 END) AS dineIn
+        SUM(CASE WHEN servicetype = 'TAKE AWAY' THEN 1 ELSE 0 END) AS takeAway,
+        SUM(CASE WHEN servicetype = 'DINE IN' THEN 1 ELSE 0 END) AS dineIn,
+        SUM(CASE WHEN servicetype = 'DELIVERY' THEN 1 ELSE 0 END) AS delivery
       FROM order_tb
     `);
 
@@ -130,6 +131,7 @@ export class ReportService {
       serviceType: {
         takeAway: parseInt(serviceType.takeaway, 10),
         dineIn: parseInt(serviceType.dinein, 10),
+        delivery: parseInt(serviceType.delivery, 10),
       },
       topProducts: topProducts.map(row => ({
         name: row.name,
@@ -206,18 +208,17 @@ export class ReportService {
     FROM order_details od
     JOIN product p ON od.productid = p.id
     JOIN order_tb o ON od.orderid = o.id
-    JOIN staff s ON o.staffid = s.id
-    WHERE s.branchid = $1
+    WHERE o.branchid = $1
     GROUP BY p.category
   `, [branchId]);
 
     const [serviceType] = await this.dataSource.query(`
     SELECT 
-      SUM(CASE WHEN o.servicetype = 'Take Away' THEN 1 ELSE 0 END) AS takeAway,
-      SUM(CASE WHEN o.servicetype = 'Dine In' THEN 1 ELSE 0 END) AS dineIn
-    FROM order_tb o
-    JOIN staff s ON o.staffid = s.id
-    WHERE s.branchid = $1
+      SUM(CASE WHEN servicetype = 'TAKE AWAY' THEN 1 ELSE 0 END) AS takeAway,
+      SUM(CASE WHEN servicetype = 'DINE IN' THEN 1 ELSE 0 END) AS dineIn,
+      SUM(CASE WHEN servicetype = 'DELIVERY' THEN 1 ELSE 0 END) AS delivery
+    FROM order_tb
+    WHERE branchid = $1
   `, [branchId]);
 
     const topProducts = await this.dataSource.query(`
@@ -225,8 +226,7 @@ export class ReportService {
     FROM order_details od
     JOIN product p ON p.id = od.productid
     JOIN order_tb o ON o.id = od.orderid
-    JOIN staff s ON o.staffid = s.id
-    WHERE s.branchid = $1
+    WHERE o.branchid = $1
     GROUP BY p.name
     ORDER BY amount DESC
     LIMIT 5
@@ -262,6 +262,7 @@ export class ReportService {
       serviceType: {
         takeAway: parseInt(serviceType.takeaway, 10),
         dineIn: parseInt(serviceType.dinein, 10),
+        delivery: parseInt(serviceType.delivery, 10),
       },
       topProducts: topProducts.map(row => ({
         name: row.name,
