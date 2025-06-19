@@ -31,9 +31,9 @@ export class CouponService {
   }
 
   async create(dto: CouponDto) {
-    const promote = await this.promoteRepo.findOne({ where: { id: dto.promoteID } });
+    const promote = await this.promoteRepo.findOne({ where: { id: dto.promoteId } });
     if (!promote) {
-      throw new NotFoundException(`Promote with ID ${dto.promoteID} not found`);
+      throw new NotFoundException(`Promote with ID ${dto.promoteId} not found`);
     }
 
     const coupon = this.couponRepo.create({
@@ -51,9 +51,9 @@ export class CouponService {
       throw new NotFoundException(`Coupon with ID ${id} not found`);
     }
 
-    const promote = await this.promoteRepo.findOne({ where: { id: dto.promoteID } });
+    const promote = await this.promoteRepo.findOne({ where: { id: dto.promoteId } });
     if (!promote) {
-      throw new NotFoundException(`Promote with ID ${dto.promoteID} not found`);
+      throw new NotFoundException(`Promote with ID ${dto.promoteId} not found`);
     }
 
     coupon.code = dto.code;

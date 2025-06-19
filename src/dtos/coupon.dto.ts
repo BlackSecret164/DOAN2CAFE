@@ -15,5 +15,5 @@ export class CouponDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  promoteID?: number;
+  promoteId?: number;
 }
