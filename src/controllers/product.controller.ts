@@ -13,7 +13,7 @@ import { EnumRoles } from 'src/enums/role.enum';
 // @Role([EnumRoles.ADMIN_SYSTEM])
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @Get('/list')
   @ApiOperation({ summary: 'Get list of products' })
@@ -25,6 +25,11 @@ export class ProductController {
   @ApiOperation({ summary: 'Get product by ID' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productService.findOne(id);
+  }
+
+  @Get('/available-branches/:productId')
+  findBranches(@Param('productId', ParseIntPipe) productId: number) {
+    return this.productService.findBranchesByProduct(productId);
   }
 
   @Post()

@@ -19,6 +19,9 @@ export class ProductService {
     @InjectRepository(ProductSize)
     private readonly sizeRepo: Repository<ProductSize>,
 
+    @InjectRepository(ProductBranch)
+    private readonly productBranchRepo: Repository<ProductBranch>,
+
     private readonly dataSource: DataSource,
   ) { }
 
@@ -93,6 +96,26 @@ export class ProductService {
       })),
     };
   }
+
+  async findBranchesByProduct(productId: number) {
+    const records = await this.productBranchRepo.find({
+      where: {
+        product: { id: productId },
+        available: true,
+      },
+      relations: ['branch'],
+      order: { branch: { id: 'ASC' } },
+    });
+
+    return records.map((record) => ({
+      id: record.branch.id,
+      name: record.branch.name,
+      address: record.branch.address,
+      phone: record.branch.phone,
+      createdAt: record.branch.createdAt,
+    }));
+  }
+
   async create(createDto: CreateProductDto) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
