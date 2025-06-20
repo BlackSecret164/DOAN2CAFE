@@ -57,6 +57,8 @@ export class ProductService {
           price: s.price,
         })),
       materials: product.productMaterials.map((pm) => ({
+        materialId: pm.materialId,
+        materialQuantity: pm.materialQuantity,
         name: pm.rawMaterial.name,
       })),
 
@@ -92,6 +94,8 @@ export class ProductService {
           price: s.price,
         })),
       materials: product.productMaterials.map((pm) => ({
+        materialId: pm.materialId,
+        materialQuantity: pm.materialQuantity,
         name: pm.rawMaterial.name,
       })),
     };
