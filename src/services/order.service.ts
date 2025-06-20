@@ -125,7 +125,7 @@ export class OrderService {
   async findAllByCustomerPhone(phone: string) {
     const orders = await this.orderRepo.find({
       where: { phoneCustomer: phone },
-      relations: ['details', 'details.product'],
+      relations: ['details', 'details.product', 'branch'],
       order: { orderDate: 'DESC' },
     });
 
@@ -134,7 +134,8 @@ export class OrderService {
       serviceType: order.serviceType,
       orderDate: order.orderDate,
       status: order.status,
-      branchId: order.branch?.id,
+      branchId: order.branchId,
+      branchName: order.branch?.name ?? '',
       totalPrice: order.totalPrice,
       order_details: (order.details || [])
         .filter(d => d && d.product && d.product.id)
