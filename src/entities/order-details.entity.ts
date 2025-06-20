@@ -21,7 +21,7 @@ export class OrderDetails {
   @Column({ name: 'quantity_product', type: 'int' })
   quantity: number;
 
-  @Column({ type: 'varchar', length: 5, nullable: true })
+  @Column({ type: 'varchar', length: 16, nullable: true })
   size: string;
 
   @Column({ type: 'varchar', length: 5, nullable: true })
