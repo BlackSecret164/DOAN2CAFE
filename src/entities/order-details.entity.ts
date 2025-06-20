@@ -19,7 +19,7 @@ export class OrderDetails {
   order: Order;
 
   @Column({ name: 'quantity_product', type: 'int' })
-  quantityProduct: number;
+  quantity: number;
 
   @Column({ type: 'varchar', length: 5, nullable: true })
   size: string;

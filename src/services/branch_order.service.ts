@@ -57,13 +57,13 @@ export class BranchOrderService {
         });
 
         const unitPrice = productSize?.price ?? 0;
-        const totalItemPrice = unitPrice * d.quantityProduct;
+        const totalItemPrice = unitPrice * d.quantity;
 
         return {
           productId: d.product.id,
           size: d.size,
           mood: d.mood,
-          quantity: d.quantityProduct,
+          quantity: d.quantity,
           unitPrice,
           totalItemPrice,
         };
@@ -90,7 +90,7 @@ export class BranchOrderService {
         productId: d.product.id,
         size: d.size,
         mood: d.mood,
-        quantity: d.quantityProduct,
+        quantity: d.quantity,
       })),
     };
   }

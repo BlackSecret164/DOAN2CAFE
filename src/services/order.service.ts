@@ -141,7 +141,7 @@ export class OrderService {
         productId: d.product.id,
         size: d.size,
         mood: d.mood,
-        quantity: d.quantityProduct,
+        quantity: d.quantity,
       })),
     }));
   }
@@ -163,7 +163,7 @@ export class OrderService {
         productId: d.product.id,
         size: d.size,
         mood: d.mood,
-        quantity: d.quantityProduct,
+        quantity: d.quantity,
       })),
     };
   }

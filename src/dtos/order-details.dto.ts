@@ -12,7 +12,7 @@ export class CreateOrderDetailsDto {
 
   @ApiProperty()
   @IsNumber()
-  quantityProduct: number;
+  quantity: number;
 
   @ApiProperty()
   @IsString()
