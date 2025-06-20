@@ -5,6 +5,7 @@ import { Order } from 'src/entities/order_tb.entity';
 import { OrderDetails } from 'src/entities/order-details.entity';
 import { CreateOrderDto, UpdateOrderDto } from 'src/dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
+import { ProductSize } from 'src/entities/product_size.entity';
 
 @Injectable()
 export class BranchOrderService {
@@ -14,7 +15,11 @@ export class BranchOrderService {
 
     @InjectRepository(OrderDetails)
     private readonly detailRepo: Repository<OrderDetails>,
-  ) {}
+
+    @InjectRepository(ProductSize)
+    private readonly sizeRepo: Repository<ProductSize>,
+
+  ) { }
 
   async findAllByBranch(branchId: number) {
     return this.orderRepository.find({
@@ -25,27 +30,70 @@ export class BranchOrderService {
   }
 
   async findLatestInBranch(branchId: number) {
-  const raw = await this.orderRepository
-    .createQueryBuilder('order')
-    .select([
-      'order.id AS id',
-      'order.phoneCustomer AS phone',
-      'order.serviceType AS "serviceType"',
-      'order.orderDate AS "orderDate"',
-      'order.tableID AS "tableID"',
-    ])
-    .where('order.branchID = :branchId', { branchId })
-    .orderBy('order.id', 'DESC')
-    .limit(1)
-    .getRawOne();
+    // Thay vì raw query chỉ lấy một vài trường, chúng ta load cả quan hệ details
+    const order = await this.orderRepository.findOne({
+      where: { branch: { id: branchId } },
+      relations: ['details', 'details.product'],
+      order: { id: 'DESC' },
+    });
+    if (!order) {
+      throw new NotFoundException('No orders found in this branch');
+    }
 
-  if (!raw) {
-    throw new NotFoundException('No orders found in this branch');
+    // Tính phí giao hàng
+    let deliveryFee = 0;
+    if (order.serviceType === 'DELIVERY' && order.totalPrice < 250000) {
+      deliveryFee = 15000;
+    }
+
+    // 2. Lấy giá từng sản phẩm theo size
+    const detailItems = await Promise.all(
+      order.details.map(async (d) => {
+        const productSize = await this.sizeRepo.findOne({
+          where: {
+            product: { id: d.product.id },  // nếu có quan hệ @ManyToOne
+            sizeName: d.size,
+          },
+        });
+
+        const unitPrice = productSize?.price ?? 0;
+        const totalItemPrice = unitPrice * d.quantityProduct;
+
+        return {
+          productId: d.product.id,
+          size: d.size,
+          mood: d.mood,
+          quantity: d.quantityProduct,
+          unitPrice,
+          totalItemPrice,
+        };
+      }),
+    );
+
+    const totalProductPrice = detailItems.reduce((sum, item) => sum + item.totalItemPrice, 0);
+
+    // 3. Tính discount
+    const discount = (totalProductPrice + deliveryFee) - order.totalPrice;
+
+    return {
+      id: order.id,
+      phoneCustomer: order.phoneCustomer,
+      serviceType: order.serviceType,
+      orderDate: order.orderDate,
+      branchId: order.branchId,
+      status: order.status,
+      totalPrice: order.totalPrice,
+      deliveryFee: deliveryFee,
+      discount: discount,
+      // Trả về mảng chi tiết để frontend dễ dùng
+      order_details: order.details.map((d) => ({
+        productId: d.product.id,
+        size: d.size,
+        mood: d.mood,
+        quantity: d.quantityProduct,
+      })),
+    };
   }
-
-  return raw;
-}
-
 
   async findOneByBranch(id: number, branchId: number) {
     const order = await this.orderRepository.findOne({
