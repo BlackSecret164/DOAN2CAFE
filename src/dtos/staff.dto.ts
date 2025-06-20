@@ -113,4 +113,18 @@ export class UpdateStaffDto {
   @IsOptional()
   @IsDateString()
   startDate?: string;
+
+  @ApiProperty({ enum: ['ADMIN_SYSTEM', 'ADMIN_BRAND', 'STAFF'] })
+  @IsIn(['ADMIN_SYSTEM', 'ADMIN_BRAND', 'STAFF'])
+  role: string;
+
+  @ApiProperty()
+  @IsNumber()
+  branchId: number;
+}
+
+export class UpdateStaffBranchIdDto {
+  @ApiProperty()
+  @IsNumber()
+  branchId: number;
 }
