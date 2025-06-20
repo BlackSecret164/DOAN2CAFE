@@ -131,17 +131,16 @@ export class OrderService {
 
     return orders.map(order => ({
       id: order.id,
+      branchId: order.branch?.id,
       serviceType: order.serviceType,
       orderDate: order.orderDate,
       status: order.status,
-      branchId: order.branch?.id,
       totalPrice: order.totalPrice,
-      // trả về order_details đầy đủ
       order_details: order.details.map(d => ({
-        productId: d.product.id,
+        productId: d.productID,           // Lưu ý: phải đúng entity field!
         size: d.size,
         mood: d.mood,
-        quantity: d.quantity,
+        quantity: d.quantity,             // entity field (đúng với entity bạn gửi)
       })),
     }));
   }
