@@ -111,11 +111,18 @@ export class CartService {
         return { message: 'Deleted' };
     }
 
-    async clearCart(phone: string) {
+    async clearCartByCustomer(phone: string) {
         const customer = await this.customerRepo.findOne({ where: { phone } });
         if (!customer) throw new NotFoundException('Customer not found');
 
         await this.cartRepo.delete({ customer });
-        return { message: 'Cart cleared' };
+        return { message: 'Cart cleared (customer)' };
+    }
+
+    /** Xóa toàn bộ giỏ hàng theo sessionId */
+    async clearCartBySession(sessionId: string) {
+        // Xóa mọi cartItem gắn với sessionId
+        await this.cartRepo.delete({ sessionId });
+        return { message: 'Cart cleared (session)' };
     }
 }
