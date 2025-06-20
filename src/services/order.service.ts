@@ -123,43 +123,49 @@ export class OrderService {
   }
 
   async findAllByCustomerPhone(phone: string) {
-    return this.orderRepo
-      .createQueryBuilder('order')
-      .leftJoin('order.details', 'detail')
-      .select([
-        'order.id AS id',
-        'order.serviceType AS "serviceType"',
-        'order.orderDate AS "orderDate"',
-        'order.status AS "status"',
-        'ARRAY_AGG(detail.productID) AS "productIDs"',
-      ])
-      .where('order.phoneCustomer = :phone', { phone })
-      .groupBy('order.id')
-      .orderBy('order.orderDate', 'DESC')
-      .getRawMany();
+    const orders = await this.orderRepo.find({
+      where: { phoneCustomer: phone },
+      relations: ['details', 'details.product'],
+      order: { orderDate: 'DESC' },
+    });
+
+    return orders.map(order => ({
+      id: order.id,
+      serviceType: order.serviceType,
+      orderDate: order.orderDate,
+      status: order.status,
+      branchId: order.branch?.id,
+      totalPrice: order.totalPrice,
+      // trả về order_details đầy đủ
+      order_details: order.details.map(d => ({
+        productId: d.product.id,
+        size: d.size,
+        mood: d.mood,
+        quantity: d.quantityProduct,
+      })),
+    }));
   }
 
   async findOneByCustomerPhone(id: number, phone: string) {
-    const order = await this.orderRepo
-      .createQueryBuilder('order')
-      .leftJoin('order.details', 'detail')
-      .select([
-        'order.id AS id',
-        'order.serviceType AS "serviceType"',
-        'order.orderDate AS "orderDate"',
-        'order.status AS "status"',
-        'order.totalPrice AS "totalPrice"',
-        'ARRAY_AGG(detail.productID) AS "productIDs"',
-      ])
-      .where('order.id = :id AND order.phoneCustomer = :phone', { id, phone })
-      .groupBy('order.id')
-      .getRawOne();
-
-    if (!order) {
-      throw new NotFoundException('Order not found or not yours');
-    }
-
-    return order;
+    const order = await this.orderRepo.findOne({
+      where: { id, phoneCustomer: phone },
+      relations: ['details', 'details.product'],
+    });
+    if (!order) throw new NotFoundException('Order not found or not yours');
+    return {
+      id: order.id,
+      serviceType: order.serviceType,
+      orderDate: order.orderDate,
+      status: order.status,
+      branchId: order.branch?.id,
+      totalPrice: order.totalPrice,
+      order_details: order.details.map(d => ({
+        productId: d.product.id,
+        size: d.size,
+        mood: d.mood,
+        quantity: d.quantityProduct,
+      })),
+    };
   }
 
   async cancelByCustomer(id: number, phone: string) {
