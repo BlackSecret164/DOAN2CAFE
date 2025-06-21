@@ -52,6 +52,30 @@ export class RatingService {
         return this.ratingRepo.save(rating);
     }
 
+    async findAll(): Promise<RatingResponseDto[]> {
+        const ratings = await this.ratingRepo.find({
+            relations: ['customer', 'product'],
+            order: { createdAt: 'DESC' },
+        });
+
+        return ratings.map((r) => ({
+            id: r.id,
+            description: r.description,
+            star: r.star,
+            createdAt: r.createdAt,
+            customer: {
+                phone: r.customer.phone,
+                name: r.customer.name,
+                rank: r.customer.rank,
+            },
+            product: {
+                id: r.product.id,
+                name: r.product.name,
+                image: r.product.image,
+            },
+        }));
+    }
+
     async findByProduct(productId: number) {
         const ratings = await this.ratingRepo.find({
             where: { product: { id: productId } },

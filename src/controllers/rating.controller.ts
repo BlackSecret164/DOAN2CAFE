@@ -13,6 +13,11 @@ export class RatingController {
         return this.ratingService.create(dto);
     }
 
+    @Get('/list')
+    async getAllRatings() {
+        return this.ratingService.findAll();
+    }
+
     @Get('product/:productId')
     findByProduct(@Param('productId') productId: number) {
         return this.ratingService.findByProduct(productId);
