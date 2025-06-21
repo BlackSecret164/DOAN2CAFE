@@ -53,6 +53,6 @@ export class BranchStaffController {
   @Role([EnumRoles.ADMIN_BRAND])
   async remove(@Req() req: Request, @Res() res: Response, @Param('id') id: number) {
     const user = req.user as UserModal;
-    return res.status(HttpStatus.OK).json(await this.branchStaffService.remove(user.branchId, id));
+    return res.status(HttpStatus.OK).json(await this.branchStaffService.remove(id, user.branchId));
   }
 }
