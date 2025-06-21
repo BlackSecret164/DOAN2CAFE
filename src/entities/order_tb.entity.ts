@@ -14,7 +14,7 @@ export class Order {
   @Column({ name: 'phonecustomer', length: 15 })
   phoneCustomer: string;
 
-  @ManyToOne(() => Customer, (customer) => customer.orders)
+  @ManyToOne(() => Customer, (customer) => customer.orders, { nullable: true })
   @JoinColumn({ name: 'phonecustomer', referencedColumnName: 'phone' })
   customer: Customer;
 
