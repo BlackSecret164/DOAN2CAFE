@@ -83,16 +83,38 @@ export class CartService {
     }
 
     async migrateSessionToCustomer(sessionId: string, phoneCustomer: string) {
-        const items = await this.cartItemRepo.find({
-            where: { sessionId },
+        // 1. Lấy cart hiện tại của user
+        const userCartItems = await this.cartItemRepo.find({
+            where: { phoneCustomer }
         });
 
-        for (const item of items) {
-            item.phoneCustomer = phoneCustomer;
-            item.sessionId = null;
-        }
+        // 2. Lấy cart theo sessionId (cart guest)
+        const sessionCartItems = await this.cartItemRepo.find({
+            where: { sessionId },
+            relations: ['product'],
+        });
 
-        return this.cartItemRepo.save(items);
+        // 3. Merge từng sản phẩm
+        for (const item of sessionCartItems) {
+            const existing = userCartItems.find(
+                c =>
+                    c.product.id === item.product.id &&
+                    c.size === item.size &&
+                    c.mood === item.mood
+            );
+            if (existing) {
+                // Nếu đã có, cộng dồn số lượng và xóa bản ghi session
+                existing.quantity += item.quantity;
+                await this.cartItemRepo.save(existing);
+                await this.cartItemRepo.delete(item.id); // Xóa item session
+            } else {
+                // Nếu chưa có, gán phoneCustomer, bỏ sessionId
+                item.phoneCustomer = phoneCustomer;
+                item.sessionId = null;
+                await this.cartItemRepo.save(item);
+            }
+        }
+        return { message: 'Cart migrated' };
     }
 
     async updateQuantity(id: number, dto: UpdateCartItemDto) {
