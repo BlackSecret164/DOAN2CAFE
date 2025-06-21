@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Rating } from '../entities/rating.entity';
 import { Repository } from 'typeorm';
-import { CreateRatingDto, RatingResponseDto, UpdateRatingDto } from '../dtos/rating.dto';
+import { CreateRatingDto, ListRatingResponseDto, UpdateRatingDto } from '../dtos/rating.dto';
 import { Customer } from '../entities/customer.entity';
 import { Product } from '../entities/product.entity';
 import { Order } from '../entities/order_tb.entity';
@@ -52,7 +52,7 @@ export class RatingService {
         return this.ratingRepo.save(rating);
     }
 
-    async findAll(): Promise<RatingResponseDto[]> {
+    async findAll(): Promise<ListRatingResponseDto[]> {
         const ratings = await this.ratingRepo.find({
             relations: ['customer', 'product'],
             order: { createdAt: 'DESC' },

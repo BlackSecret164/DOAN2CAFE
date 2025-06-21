@@ -69,3 +69,20 @@ export class UpdateRatingDto {
   star: number;
 }
 
+export class ListRatingResponseDto {
+  id: number;
+  description: string;
+  star: number;
+  createdAt: Date;
+  customer: {
+    phone: string;
+    name: string;
+    rank: string;
+  };
+  product: {
+    id: number;
+    name: string;
+    image: string;
+  };
+}
+
