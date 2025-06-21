@@ -14,7 +14,7 @@ export class RatingController {
     }
 
     @Get('/list')
-    async getAllRatings() {
+    findAll(): Promise<any> {
         return this.ratingService.findAll();
     }
 
