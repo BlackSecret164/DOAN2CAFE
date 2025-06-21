@@ -151,7 +151,7 @@ export class OrderService {
   async findOneByCustomerPhone(id: number, phone: string) {
     const order = await this.orderRepo.findOne({
       where: { id, phoneCustomer: phone },
-      relations: ['details', 'details.product'],
+      relations: ['details', 'details.product', 'branch'],
     });
     if (!order) throw new NotFoundException('Order not found or not yours');
     return {
@@ -159,7 +159,8 @@ export class OrderService {
       serviceType: order.serviceType,
       orderDate: order.orderDate,
       status: order.status,
-      branchId: order.branch?.id,
+      branchId: order.branchId,
+      branchName: order.branch?.name ?? '',
       totalPrice: order.totalPrice,
       order_details: order.details.map(d => ({
         productId: d.product.id,
