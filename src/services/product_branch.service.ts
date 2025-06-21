@@ -22,7 +22,10 @@ export class ProductBranchService {
 
   async findAll(branchId: number) {
     const records = await this.productBranchRepo.find({
-      where: { branch: { id: branchId } },
+      where: {
+        branch: { id: branchId },
+        product: { available: true }, // Lọc sản phẩm chỉ khi còn mở bán chung toàn hệ thống
+      },
       relations: [
         'product',
         'product.sizes',
@@ -33,12 +36,13 @@ export class ProductBranchService {
     });
 
     return records.map((record) => ({
-      id: record.product.id.toString(),
+      id: record.id.toString(), // ID của bảng product_branch
+      productId: record.product.id, // Giữ lại productId nếu cần
       name: record.product.name,
       category: record.product.category,
       description: record.product.description,
       image: record.product.image,
-      available: record.available,
+      available: record.available, // Trạng thái tại chi nhánh
       hot: record.product.hot,
       cold: record.product.cold,
       isPopular: record.product.isPopular,
@@ -77,7 +81,8 @@ export class ProductBranchService {
     }
 
     return {
-      id: record.product.id.toString(),
+      id: record.id.toString(), // ID của bảng product_branch
+      productId: record.product.id,
       name: record.product.name,
       category: record.product.category,
       description: record.product.description,
