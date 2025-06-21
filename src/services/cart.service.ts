@@ -83,37 +83,40 @@ export class CartService {
     }
 
     async migrateSessionToCustomer(sessionId: string, phoneCustomer: string) {
-        // 1. Lấy cart hiện tại của user
-        const userCartItems = await this.cartItemRepo.find({
-            where: { phoneCustomer }
-        });
-
-        // 2. Lấy cart theo sessionId (cart guest)
+        // Lấy các cart items theo session
         const sessionCartItems = await this.cartItemRepo.find({
             where: { sessionId },
             relations: ['product'],
         });
 
-        // 3. Merge từng sản phẩm
+        // Lấy cart items theo user
+        const userCartItems = await this.cartItemRepo.find({
+            where: { phoneCustomer },
+            relations: ['product'],
+        });
+
         for (const item of sessionCartItems) {
-            const existing = userCartItems.find(
+            // Tìm cart item trùng trong user cart (productId, size, mood)
+            const matched = userCartItems.find(
                 c =>
-                    c.product.id === item.product.id &&
+                    c.productId === item.productId &&
                     c.size === item.size &&
                     c.mood === item.mood
             );
-            if (existing) {
-                // Nếu đã có, cộng dồn số lượng và xóa bản ghi session
-                existing.quantity += item.quantity;
-                await this.cartItemRepo.save(existing);
-                await this.cartItemRepo.delete(item.id); // Xóa item session
+
+            if (matched) {
+                // Nếu đã có, cộng dồn số lượng và xóa cart item guest
+                matched.quantity += item.quantity;
+                await this.cartItemRepo.save(matched);
+                await this.cartItemRepo.delete(item.id);
             } else {
-                // Nếu chưa có, gán phoneCustomer, bỏ sessionId
+                // Nếu chưa có, chuyển sang user, bỏ sessionId
                 item.phoneCustomer = phoneCustomer;
                 item.sessionId = null;
                 await this.cartItemRepo.save(item);
             }
         }
+
         return { message: 'Cart migrated' };
     }
 
