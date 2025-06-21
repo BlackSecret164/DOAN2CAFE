@@ -137,10 +137,7 @@ export class CartService {
     }
 
     async clearCartByCustomer(phone: string) {
-        const customer = await this.customerRepo.findOne({ where: { phone } });
-        if (!customer) throw new NotFoundException('Customer not found');
-
-        await this.cartRepo.delete({ customer });
+        await this.cartRepo.delete({ phoneCustomer: phone }); // CHỈ CẦN DÒNG NÀY!
         return { message: 'Cart cleared (customer)' };
     }
 
