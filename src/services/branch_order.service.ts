@@ -6,6 +6,7 @@ import { OrderDetails } from 'src/entities/order-details.entity';
 import { CreateOrderDto, UpdateOrderDto } from 'src/dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { ProductSize } from 'src/entities/product_size.entity';
+import { ProductBranch } from '../entities/product_branch.entity';
 
 @Injectable()
 export class BranchOrderService {
@@ -18,6 +19,8 @@ export class BranchOrderService {
 
     @InjectRepository(ProductSize)
     private readonly sizeRepo: Repository<ProductSize>,
+    @InjectRepository(ProductBranch)
+    private readonly productBranchRepo: Repository<ProductBranch>,
 
   ) { }
 
@@ -134,15 +137,33 @@ export class BranchOrderService {
   }
 
   async addDetailInBranch(orderID: number, dto: CreateOrderDetailsDto, branchId: number) {
-    const order = await this.orderRepository.findOne({ where: { id: orderID, branchId: branchId } });
+    // 1. Kiểm tra đơn hàng
+    const order = await this.orderRepository.findOne({
+      where: { id: orderID, branch: { id: branchId } },
+    });
+
     if (!order) throw new NotFoundException('Order not found in this branch');
 
-    const detail = this.detailRepo.create({
-      ...dto,
-      order: { id: orderID },
+    // 2. Lấy product từ product_branch
+    const productBranch = await this.productBranchRepo.findOne({
+      where: { id: dto.productID },
+      relations: ['product'],
     });
+
+    if (!productBranch || !productBranch.product)
+      throw new NotFoundException('Product not found in this branch');
+
+    const detail = this.detailRepo.create({
+      order: { id: orderID },
+      product: { id: productBranch.product.id },
+      quantity: dto.quantity,
+      size: dto.size,
+      mood: dto.mood || null,
+    });
+
     return this.detailRepo.save(detail);
   }
+
 
   async remove(id: number, branchId: number) {
     const result = await this.orderRepository.delete({ id, branchId: branchId });
