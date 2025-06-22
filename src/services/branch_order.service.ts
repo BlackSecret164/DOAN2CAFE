@@ -7,6 +7,7 @@ import { CreateOrderDto, UpdateOrderDto } from 'src/dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { ProductSize } from 'src/entities/product_size.entity';
 import { ProductBranch } from '../entities/product_branch.entity';
+import { OrderStatus } from 'src/dtos/order.dto';
 
 @Injectable()
 export class BranchOrderService {
@@ -21,6 +22,8 @@ export class BranchOrderService {
     private readonly sizeRepo: Repository<ProductSize>,
     @InjectRepository(ProductBranch)
     private readonly productBranchRepo: Repository<ProductBranch>,
+    @InjectRepository(Order)
+    private readonly orderRepo: Repository<Order>,
 
   ) { }
 
@@ -134,6 +137,15 @@ export class BranchOrderService {
     const result = await this.orderRepository.update({ id, branchId: branchId }, { status: 'Đã hủy' });
     if (result.affected === 0) throw new NotFoundException(`Order ${id} not found in branch`);
     return { message: 'Order marked as cancelled' };
+  }
+
+  // branch-order.service.ts
+  async updateStatus(orderId: number, newStatus: OrderStatus, branchId: number) {
+    const order = await this.orderRepo.findOne({ where: { id: orderId, branch: { id: branchId } } });
+    if (!order) throw new NotFoundException('Order not found in your branch');
+
+    order.status = newStatus;
+    return this.orderRepo.save(order);
   }
 
   async addDetailInBranch(orderID: number, dto: CreateOrderDetailsDto, branchId: number) {

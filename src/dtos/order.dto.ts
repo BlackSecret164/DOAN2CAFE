@@ -1,4 +1,4 @@
-import { IsArray, IsDateString, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsDateString, IsInt, IsOptional, IsString, Min, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateOrderDto {
@@ -116,4 +116,20 @@ export class UpdateOrderCustomerDto {
   @ApiProperty()
   @IsString()
   status: string;
+}
+
+export enum OrderStatus {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  PREPARING = 'PREPARING',
+  READY = 'READY',
+  DELIVERING = 'DELIVERING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
+
+export class UpdateOrderStatusDto {
+  @ApiProperty({ enum: OrderStatus })
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
 }
