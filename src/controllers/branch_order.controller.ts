@@ -2,7 +2,7 @@ import { Controller, Get, Post, Put, Delete, Param, Body, Req, ParseIntPipe, Use
 import { Request } from 'express';
 import { OrderService } from 'src/services/order.service';
 import { BranchOrderService } from 'src/services/branch_order.service';
-import { CreateOrderDto, UpdateOrderDto } from 'src/dtos/order.dto';
+import { CreateOrderDto, UpdateOrderDto, UpdateOrderStatusDto } from 'src/dtos/order.dto';
 import { CreateOrderDetailsDto } from 'src/dtos/order-details.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
@@ -98,5 +98,15 @@ export class BranchOrderController {
     ) {
         const branchId = req.user['branchId'];
         return this.branchOrderService.remove(id, branchId);
+    }
+
+    @Put('status/:id')
+    async updateStatus(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: UpdateOrderStatusDto,
+        @Req() req: any,
+    ) {
+        const branchId = req.user.branchId; // Lấy từ JWT
+        return this.branchOrderService.updateStatus(id, dto.status, branchId);
     }
 }
