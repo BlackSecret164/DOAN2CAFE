@@ -81,11 +81,11 @@ export class BranchOrderService {
       serviceType: order.serviceType,
       orderDate: order.orderDate,
       branchId: order.branchId,
+      tableID: order.table?.id || null, // <- thêm dòng này
       status: order.status,
       totalPrice: order.totalPrice,
       deliveryFee: deliveryFee,
       discount: discount,
-      // Trả về mảng chi tiết để frontend dễ dùng
       order_details: order.details.map((d) => ({
         productId: d.product.id,
         size: d.size,
