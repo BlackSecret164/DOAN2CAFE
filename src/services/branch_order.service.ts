@@ -33,7 +33,7 @@ export class BranchOrderService {
     // Thay vì raw query chỉ lấy một vài trường, chúng ta load cả quan hệ details
     const order = await this.orderRepository.findOne({
       where: { branch: { id: branchId } },
-      relations: ['details', 'details.product'],
+      relations: ['details', 'details.product', 'table'],
       order: { id: 'DESC' },
     });
     if (!order) {
