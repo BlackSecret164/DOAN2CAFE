@@ -7,6 +7,7 @@ import { Customer } from '../entities/customer.entity';
 import { Staff } from '../entities/staff.entity';
 import { Table } from '../entities/tables.entity';
 import { OrderDetails } from '../entities/order-details.entity';
+import { Branch } from 'src/entities/branches.entity';
 
 @Injectable()
 export class ReportService {
@@ -18,17 +19,19 @@ export class ReportService {
     @InjectRepository(Staff) private staffRepo: Repository<Staff>,
     @InjectRepository(Table) private tableRepo: Repository<Table>,
     @InjectRepository(OrderDetails) private orderDetailRepo: Repository<OrderDetails>,
+    @InjectRepository(Branch) private branchRepo: Repository<Branch>,
   ) { }
 
   async getSystemReport() {
     // Tổng quan
-    const [totalPayment, totalProduct, totalCustomer, totalStaff, totalOrder, totalTable] = await Promise.all([
+    const [totalPayment, totalProduct, totalCustomer, totalStaff, totalOrder, totalTable, totalBranch] = await Promise.all([
       this.orderRepo.createQueryBuilder().select('SUM(totalprice)', 'sum').getRawOne(),
       this.productRepo.count(),
       this.customerRepo.count(),
       this.staffRepo.count(),
       this.orderRepo.count(),
       this.tableRepo.count(),
+      this.branchRepo.count(),
     ]);
 
     // Đơn hàng & doanh thu 14 ngày
@@ -104,6 +107,7 @@ export class ReportService {
       totalStaff,
       totalOrder,
       totalTable,
+      totalBranch,
       last14DaysOrder: last14DaysOrder.map(row => ({
         date: row.date,
         amount: parseInt(row.amount, 10),

@@ -8,9 +8,10 @@ import { Customer } from '../entities/customer.entity';
 import { Staff } from '../entities/staff.entity';
 import { Table } from '../entities/tables.entity';
 import { OrderDetails } from '../entities/order-details.entity';
+import { Branch } from 'src/entities/branches.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, Product, Customer, Staff, Table, OrderDetails])],
+  imports: [TypeOrmModule.forFeature([Order, Product, Customer, Staff, Table, OrderDetails, Branch])],
   controllers: [ReportController],
   providers: [ReportService],
 })
