@@ -281,6 +281,7 @@ export class ReportService {
       b.id AS branchId,
       b.name AS branchName,
       COALESCE(SUM(o.totalprice), 0) AS totalRevenue,
+      COUNT(DISTINCT o.id) AS "totalOrders",
       COALESCE(SUM(od.quantity_product), 0) AS totalSold
     FROM branches b
     LEFT JOIN order_tb o 
@@ -297,6 +298,7 @@ export class ReportService {
       branchId: row.branchid,
       branchName: row.branchname,
       totalRevenue: parseFloat(row.totalrevenue),
+      totalOrders: parseInt(row.totalOrders, 10),
       totalSold: parseInt(row.totalsold, 10),
     }));
   }
