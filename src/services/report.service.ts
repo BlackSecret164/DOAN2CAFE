@@ -271,4 +271,30 @@ export class ReportService {
     };
   }
 
+  async getBranchMonthlyComparison() {
+    const result = await this.dataSource.query(`
+      SELECT
+      b.id AS branchId,
+      b.name AS branchName,
+      COALESCE(SUM(o.totalprice), 0) AS totalRevenue,
+      COALESCE(SUM(od.quantity_product), 0) AS totalSold
+    FROM branches b
+    LEFT JOIN order_tb o 
+      ON o.branchid = b.id
+      AND o.orderdate >= DATE_TRUNC('month', CURRENT_DATE)
+      AND o.orderdate < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+    LEFT JOIN order_details od 
+      ON od.orderid = o.id
+    GROUP BY b.id, b.name
+    ORDER BY b.id;
+    `);
+
+    return result.map(row => ({
+      branchId: row.branchid,
+      branchName: row.branchname,
+      totalRevenue: parseFloat(row.totalrevenue),
+      totalSold: parseInt(row.totalsold, 10),
+    }));
+  }
+
 }

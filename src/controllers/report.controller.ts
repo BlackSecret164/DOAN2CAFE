@@ -26,7 +26,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard, RoleGuard)*/
 @Controller('report')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) {}
+  constructor(private readonly reportService: ReportService) { }
 
   @Get('system')
   //@Role([EnumRoles.ADMIN_SYSTEM])
@@ -42,4 +42,10 @@ export class ReportController {
   async getBranchReport(@Param('branchId', ParseIntPipe) branchId: number) {
     return this.reportService.getBranchReport(branchId);
   }
+
+  @Get('/monthly-branch-compare')
+  async getBranchMonthlyComparison() {
+    return this.reportService.getBranchMonthlyComparison();
+  }
+
 }
